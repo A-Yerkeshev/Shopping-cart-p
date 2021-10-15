@@ -1,0 +1,11 @@
+{
+  "name": "shopping-cart",
+  "version": "1.0.0",
+  "description": "Sample application with payment",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "A-Yerkesh",
+  "license": "ISC"
+}
