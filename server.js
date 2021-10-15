@@ -1,15 +1,14 @@
 const express = require("express");
+
 const app = express();
-app.set('view engine', 'ejs');
 
 if (process.env.NODE_ENV !== 'production') {
+  // Require dotenv and livereload
+  // Create live reload server and connect to app
   const livereload = require("livereload");
   const conLivereload = require("connect-livereload");
 
   require("dotenv").config();
-
-  const skey = process.env.STRIPE_SKEY;
-  const pkey = process.env.STRIPE_PKEY;
 
   const liveServer = livereload.createServer();
   liveServer.watch('public');
@@ -23,5 +22,10 @@ if (process.env.NODE_ENV !== 'production') {
   })
 }
 
+const skey = process.env.STRIPE_SKEY;
+const pkey = process.env.STRIPE_PKEY;
+
+app.set('view engine', 'ejs');
+
 app.use(express.static('public'));
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
