@@ -28,7 +28,7 @@ const pkey = process.env.STRIPE_PKEY;
 
 // app.set('view engine', 'ejs');
 
-app.use(express.static('public'));
+app.use('/', express.static('public'));
 
 app.get('/products', (request, response) => {
   const client = new Client({
