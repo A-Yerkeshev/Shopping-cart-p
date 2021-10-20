@@ -43,7 +43,7 @@ app.get('/products', (request, response) => {
 
   client.query('SELECT * from products', (error, data) => {
     if (error) {console.log(error.stack)}
-    response.send(data.rows);
+    response.status(200).send(data.rows);
     client.end();
   })
 })
