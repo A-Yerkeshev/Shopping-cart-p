@@ -1,5 +1,5 @@
 const express = require("express");
-const { Pool } = require("pg");
+const { Client } = require("pg");
 
 const app = express();
 
@@ -26,27 +26,26 @@ if (process.env.NODE_ENV !== 'production') {
 const skey = process.env.STRIPE_SKEY;
 const pkey = process.env.STRIPE_PKEY;
 
-app.set('view engine', 'ejs');
-
-// const pool = new Pool({
-//   connectionString: process.env.DATABASE_URL,
-//   ssl: {
-//     rejectUnauthorized: false
-//   }
-// });
-
-// app.get('/', async (req, res) => {
-//     try {
-//       const client = await pool.connect();
-//       const result = await client.query('SELECT * FROM test_table');
-//       const results = { 'results': (result) ? result.rows : null};
-//       res.render('pages/db', results );
-//       client.release();
-//     } catch (err) {
-//       console.error(err);
-//       res.send("Error " + err);
-//     }
-//   })
+// app.set('view engine', 'ejs');
 
 app.use(express.static('public'));
+
+app.get('/products', (request, response) => {
+  const client = new Client({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    database: process.env.DB,
+    password: process.env.DB_PASSWORD
+  })
+
+  client.connect();
+
+  client.query('SELECT * from products', (error, data) => {
+    if (error) {console.log(error.stack)}
+    response.send(data.rows);
+    client.end();
+  })
+})
+
 app.listen(process.env.PORT || 3000);
