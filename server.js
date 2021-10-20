@@ -31,14 +31,6 @@ const pkey = process.env.STRIPE_PKEY;
 app.use('/', express.static('public'));
 
 app.get('/products', (request, response) => {
-  console.log('ENV VARIABLES:', `
-    host: ${process.env.DB_HOST},
-    port: ${process.env.DB_PORT},
-    user: ${process.env.DB_USER},
-    database: ${process.env.DB},
-    password: ${process.env.DB_PASSWORD}
-    `)
-
   const client = new Client({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -47,7 +39,11 @@ app.get('/products', (request, response) => {
     password: process.env.DB_PASSWORD
   })
 
-  client.connect();
+  client.connect((error) => {
+    if (error) {console.log('Database connection error.', error.stack)} else {
+      console.log('Connection to database established');
+    }
+  });
 
   client.query('SELECT * from products', (error, data) => {
     if (error) {console.log(error.stack)}
