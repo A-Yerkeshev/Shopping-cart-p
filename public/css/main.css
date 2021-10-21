@@ -1,0 +1,76 @@
+:root {
+  --yellow: #f5f500;
+  --yellow-shade: #aaaa00;
+  --black: #403530;
+  --white: #f9f7f7;
+  --orbitron: orbitron, 'Courier New', monospace;
+}
+
+@font-face {
+  font-family: orbitron;
+  src: url(../fonts/Orbitron-Regular.ttf);
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 36px;
+  font-family: Verdana, Geneva, sans-serif;
+  color: var(--black);
+}
+
+body {
+  background-color: var(--white);
+}
+
+/***************************************/
+
+header {
+  padding: 0.6rem 0;
+  background-image: linear-gradient(170deg, var(--yellow) 40%, var(--yellow-shade));
+  width: 100%;
+  position: relative;
+
+  border: 0.3rem solid var(--yellow);
+}
+
+header::after {
+  background-image: repeating-linear-gradient(0deg, var(--black), var(--black) 11px,  transparent 11px, transparent 37px);
+  position: absolute;
+  content: '';
+  clip-path: polygon(100% 30%, 100% 100%, 0% 100%);
+
+  width: 40%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+header h1 {
+  font-family: orbitron;
+  font-size: 3rem;
+  line-height: 2.6rem;
+  width: 60%;
+  margin-bottom: 0.6rem;
+}
+
+header h2 {
+  font-size: 0.8rem;
+}
+
+nav {
+  background-color: var(--black);
+  font-size: 1.2rem;
+  width: 100%;
+  padding: 0.4rem;
+}
+
+nav a {
+  color: var(--white);
+  margin: 0 1rem;
+}

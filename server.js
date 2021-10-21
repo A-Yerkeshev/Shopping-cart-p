@@ -44,7 +44,7 @@ const skey = process.env.STRIPE_SKEY;
 const pkey = process.env.STRIPE_PKEY;
 
 client.connect((error) => {
-  if (error) {console.log('Database connection error.', error.stack)} else {
+  if (error) {console.log('Database connection error: ', error.stack)} else {
     console.log('Connection to database established');
   }
 })
@@ -55,9 +55,8 @@ app.use('/', express.static('public'));
 
 app.get('/products', (request, response) => {
   client.query('SELECT * from products', (error, data) => {
-    if (error) {console.log(error.stack)}
+    if (error) {console.log('Database query error: ', error.stack)};
     response.status(200).send(data.rows);
-    client.end();
   })
 })
 
