@@ -65,6 +65,28 @@ function fillTemplate(template, data) {
     repeat.remove();
   }
 
+  // Check for insert statements
+  const insertTags = template.content.querySelectorAll('insert');
+
+  for (let insert of insertTags) {
+    const id = insert.getAttribute('template');
+    if (!id) {
+      throw new Error(`<insert> tag requires "template attribute".`);
+      return;
+    }
+
+    const tpl = document.getElementById(id);
+    if (!tpl) {
+      throw new Error(`Template with id "${id}" does not exist.`);
+      return;
+    }
+
+    const content = fillTemplate(tpl, data);
+
+    insert.parentNode.insertBefore(content, insert);
+    insert.remove();
+  }
+
   // Replace template variables with values
   let string = template.innerHTML;
   let start = string.indexOf('{{');
