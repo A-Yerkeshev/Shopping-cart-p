@@ -21,6 +21,20 @@
   </main>
   <script type="module" src="js/main.js"></script>
 </body>
+
+<template id="store">
+  <div class="container">
+    <repeat for="i of items">
+      <span>123</span>
+      <b>456</b>
+    </repeat>
+    <repeat for="i of items">
+      <span>789</span>
+      <b>012</b>
+    </repeat>
+  </div>
+</template>
+
 <template id="item-template">
   <div class="item">
     <img src="/img/{{ image }}.jpg">
@@ -30,4 +44,5 @@
     </div>
   </div>
 </template>
+
 </html>
