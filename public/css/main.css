@@ -1,11 +1,13 @@
 :root {
   --yellow: #f5f500;
-  --yellow-shade: #aaaa00;
+  --yellow-pale: #ffff99;
+  --yellow-shade: #999900;
   --black: #403530;
   --white: #f9f7f7;
   --orbitron: orbitron, 'Courier New', monospace;
 }
 
+/* Font by Matt McInerney from Google Fonts*/
 @font-face {
   font-family: orbitron;
   src: url(../fonts/Orbitron-Regular.ttf);
@@ -59,8 +61,9 @@ header h1 {
   margin-bottom: 0.6rem;
 }
 
-header h2 {
+header span {
   font-size: 0.8rem;
+  font-weight: bold;
 }
 
 nav {
@@ -73,4 +76,37 @@ nav {
 nav a {
   color: var(--white);
   margin: 0 1rem;
+}
+
+/*********************************************/
+
+.item {
+  width: 70%;
+  margin: auto;
+  padding: 1rem;
+  background-color: var(--yellow-pale);
+  box-shadow: 0 6px 8px var(--yellow-shade);
+}
+
+.item img {
+  width: 100%;
+  padding: 1rem;
+  background-color: white;
+  vertical-align: bottom;
+}
+
+.item-descr {
+  background-color: white;
+  overflow: auto;
+  padding: 0.4rem;
+}
+
+.item-descr h2 {
+  padding-left: 1rem;
+}
+
+.price{
+  float: right;
+  font-size: 2.2rem;
+  color: red;
 }

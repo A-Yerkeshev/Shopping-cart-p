@@ -9,15 +9,25 @@
 </head>
 <body>
   <header>
-    <h1>Computer Parts</h1><h2>demo store</h2>
+    <h1>Computer Parts</h1><span>Demo store</span>
   </header>
   <nav>
     <a href="">Browse</a>
     <a href="">Sign In</a>
     <a href="">Sign Up</a>
   </nav>
-  <p class="descr">sdcsds</p>
-  <main id="view"></main>
+  <p class="descr">REPLACE WITH DESCRIPTION</p>
+  <main id="view">
+  </main>
   <script type="module" src="js/main.js"></script>
 </body>
+<template id="item-template">
+  <div class="item">
+    <img src="/img/{{ image }}.jpg">
+    <div class="item-descr">
+      <h2>{{ name }}</h2>
+      <span class="price">{{ price }}</span>
+    </div>
+  </div>
+</template>
 </html>
