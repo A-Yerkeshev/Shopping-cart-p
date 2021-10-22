@@ -82,7 +82,7 @@ nav a {
 
 .item {
   width: 70%;
-  margin: auto;
+  margin: 1rem auto;
   padding: 1rem;
   background-color: var(--yellow-pale);
   box-shadow: 0 6px 8px var(--yellow-shade);
@@ -109,4 +109,33 @@ nav a {
   float: right;
   font-size: 2.2rem;
   color: red;
+}
+
+/********************************************/
+.sign-up h2 {
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.sign-up form {
+  width: 80%;
+  margin: auto;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sign-up input {
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.sign-up input[type="submit"] {
+  width: 35%;
+  margin: 1rem auto 0;
+  padding: 0.4rem;
+  background-color: var(--yellow-pale);
+  border: none;
+  color: var(--black);
+  box-shadow: 0 1px 4px var(--yellow-shade);
 }

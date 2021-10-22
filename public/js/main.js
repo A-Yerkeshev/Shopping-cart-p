@@ -109,10 +109,10 @@ function fillTemplate(template, data) {
   return document.createRange().createContextualFragment(string);
 }
 
-fetch('/products')
-  .then(response => response.json())
-  .then((data) => {
-    main.appendChild(fillTemplate(template, {items: data}));
-  }).catch((error) => {
-    console.log('Error fetching data from /products.', error);
-  })
+// fetch('/products')
+//   .then(response => response.json())
+//   .then((data) => {
+//     main.appendChild(fillTemplate(template, {items: data}));
+//   }).catch((error) => {
+//     console.log('Error fetching data from /products.', error);
+//   })
