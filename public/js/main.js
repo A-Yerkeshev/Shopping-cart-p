@@ -46,8 +46,8 @@ function fillTemplate(template, data) {
 
     // By this point iterable is found and has correct type
 
-    // Iterate through iterable, fill new template on every iteration, append result to outputStr
-    let outputStr = '';
+    // Iterate through iterable, fill new template on every iteration, append result to output
+    let output = new DocumentFragment();
 
     iterable.forEach((element) => {
       const template = document.createElement('template');
@@ -57,13 +57,11 @@ function fillTemplate(template, data) {
         template.content.append(node.cloneNode(true));
       }
 
-      outputStr += fillTemplate(template, element);
+      output.append(fillTemplate(template, element));
     })
 
     // Replace <repeat> tag with actual content
-    const parsed = document.createRange().createContextualFragment(outputStr);
-
-    repeat.parentNode.insertBefore(parsed, repeat);
+    repeat.parentNode.insertBefore(output, repeat);
     repeat.remove();
   }
 
@@ -86,17 +84,13 @@ function fillTemplate(template, data) {
     }
   }
 
-  return string;
+  return document.createRange().createContextualFragment(string);
 }
 
-// fetch('/products')
-//   .then(response => response.json())
-//   .then((data) => {
-//     console.log(fillTemplate(template, data[0]));
-//   }).catch((error) => {
-//     console.log('Error fetching data from /products.', error);
-//   })
-
-const p = document.createElement('p');
-p.textContent = fillTemplate(template, {items: [{}, {}, {}]});
-main.appendChild(p);
+fetch('/products')
+  .then(response => response.json())
+  .then((data) => {
+    main.appendChild(fillTemplate(template, {items: data}));
+  }).catch((error) => {
+    console.log('Error fetching data from /products.', error);
+  })
