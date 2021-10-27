@@ -12,6 +12,7 @@ Router.when('/', store);
 Router.when('/store', store);
 Router.when('/sign-up', signUp);
 Router.when('/sign-in', signIn);
+Router.default('/');
 
 
 // fetch('/products')
