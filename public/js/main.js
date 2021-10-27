@@ -1,13 +1,25 @@
 "use strict";
+import Router from './router.js';
 
 const log = console.log;
 const main = document.getElementsByTagName('main')[0];
 // const template = document.getElementById('item-template');
 const template = document.getElementById('store');
 
+
+
+
+// fetch('/products')
+//   .then(response => response.json())
+//   .then((data) => {
+//     main.appendChild(fillTemplate(template, {items: data}));
+//   }).catch((error) => {
+//     console.log('Error fetching data from /products.', error);
+//   })
+
 function fillTemplate(template, data) {
   // Check if template is a node element
-  if (!template || template.nodeType !== Node.ELEMENT_NODE) {
+  if (!(nodeType in template) || template.nodeType !== Node.ELEMENT_NODE) {
     throw new Error('First argument passed to "fillTemplate" function must be a node element.');
     return;
   }
@@ -108,11 +120,3 @@ function fillTemplate(template, data) {
 
   return document.createRange().createContextualFragment(string);
 }
-
-// fetch('/products')
-//   .then(response => response.json())
-//   .then((data) => {
-//     main.appendChild(fillTemplate(template, {items: data}));
-//   }).catch((error) => {
-//     console.log('Error fetching data from /products.', error);
-//   })
