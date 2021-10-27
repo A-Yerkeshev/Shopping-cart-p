@@ -3,10 +3,15 @@ import Router from './router.js';
 
 const log = console.log;
 const main = document.getElementsByTagName('main')[0];
-// const template = document.getElementById('item-template');
-const template = document.getElementById('store');
 
+const store = document.getElementById('store').content;
+const signUp = document.getElementById('sign-up').content;
+const signIn = document.getElementById('sign-in').content;
 
+Router.when('/', store);
+Router.when('/store', store);
+Router.when('/sign-up', signUp);
+Router.when('/sign-in', signIn);
 
 
 // fetch('/products')
