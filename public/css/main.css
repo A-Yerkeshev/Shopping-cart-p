@@ -112,12 +112,12 @@ nav a {
 }
 
 /********************************************/
-.sign-up h2 {
+.form h2 {
   font-size: 1.6rem;
   text-align: center;
 }
 
-.sign-up form {
+.form form {
   width: 80%;
   margin: auto;
   font-size: 1.2rem;
@@ -125,12 +125,12 @@ nav a {
   flex-direction: column;
 }
 
-.sign-up input {
+.form input {
   font-size: 1.4rem;
   margin-bottom: 0.4rem;
 }
 
-.sign-up input[type="submit"] {
+.form input[type="submit"] {
   width: 35%;
   margin: 1rem auto 0;
   padding: 0.4rem;

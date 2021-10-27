@@ -14,30 +14,23 @@ const Router = (() => {
   }
 
   // Draw view on initial load
-  let hash = location.hash.substring(1);
+  document.addEventListener('DOMContentLoaded', (ev) => {
+    updateView();
+  })
 
   // Redraw view on hashchange
-  window.addEventListener('hashchange', async (ev) => {
+  window.addEventListener('hashchange', (ev) => {
     ev.preventDefault();
 
-    // Update hash value
-    hash = location.hash.substring(1);
-
-    const html = await getHTML(hash);
-
-    if (html) {
-      view.innerHTML = '';
-      view.appendChild(html);
-    } else {
-      // Url did not match any route - redirect to default
-      location.hash = '#'+defaultRoute;
-    }
+    updateView();
   })
 
   return {
     // Router.when() specifies how to change content of view depending on current url
     // Router.when() takes two arguments - first is route name like '/' or '/products' or 'products'
-    // Second argument can be either HTMLElement/DocumentFragment either function that returns HTMLElement/DocumentFragment.
+    // Second argument can be either HTMLElement/DocumentFragment either function
+    // Function must return HTMLElement/DocumentFragment if it is synchronous.
+    // If function requires some time to return result, it should return a promise.
     // This function is going to be called each time hashchange event fires and result of this function
     // is going to be drawn on the screen.
     when: function(url, content) {
@@ -66,28 +59,6 @@ const Router = (() => {
     }
   }
 })();
-
-async function getHTML(url) {
-  let result;
-
-  // Check if current url matches a route
-  if (routes.hasOwnProperty(url)) {
-    const content = routes[url];
-
-    if (typeof content == 'function') {
-      result = await content();
-
-      if (!validateElement(result)) {
-        throw new Error(`Function ${content.name} defined for route '${url}' did not return HTMLElement/DocumentFragment.`);
-        return;
-      }
-    } else if (validateElement(content)) {
-      result = content.cloneNode(true);
-    }
-
-    return result;
-  }
-}
 
 function validateUrl(url, fname) {
   // Check if url is valid string
@@ -120,6 +91,33 @@ function validateElement(element) {
     return false;
   } else {
     return true;
+  }
+}
+
+async function updateView() {
+  const hash = location.hash.substring(1);
+
+  if (routes.hasOwnProperty(hash)) {
+    let content = routes[hash];
+
+    if (typeof content == 'function') {
+      content = await content();
+
+      if (!validateElement(content)) {
+        reject(new Error(`Function defined for route '${hash}' did not return HTMLElement/DocumentFragment.`));
+      }
+    } else if (validateElement(content)) {
+      content = content.cloneNode(true);
+    } else {
+      throw new Error(`Value set in Router for route '${hash}' is not function, nor HTMLElement, nor DocumentFragment.`);
+      return;
+    }
+
+    view.innerHTML = '';
+    view.appendChild(content);
+  } else {
+    // Url did not match any route - redirect to default
+    location.hash = '#'+defaultRoute;
   }
 }
 

@@ -13,11 +13,13 @@ Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
 
-async function fillStoreTemplate() {
-  const response = await fetch('/products');
-  const data = await response.json();
-
-  return fillTemplate(store, {items: data});
+function fillStoreTemplate() {
+  return new Promise((resolve, reject) => {
+    fetch('/products')
+      .then((response) => response.json())
+      .then((data) => resolve(fillTemplate(store, {items: data})))
+      .catch((error) => reject(error))
+  })
 }
 
 function fillTemplate(template, data) {
