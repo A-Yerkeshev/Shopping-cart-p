@@ -17,17 +17,17 @@ const Router = (() => {
   let hash = location.hash.substring(1);
 
   // Redraw view on hashchange
-  window.addEventListener('hashchange', (ev) => {
+  window.addEventListener('hashchange', async (ev) => {
     ev.preventDefault();
 
     // Update hash value
     hash = location.hash.substring(1);
 
-    const html = getHTML(hash);
+    const html = await getHTML(hash);
 
     if (html) {
       view.innerHTML = '';
-      view.appendChild(getHTML(hash));
+      view.appendChild(html);
     } else {
       // Url did not match any route - redirect to default
       location.hash = '#'+defaultRoute;
@@ -67,7 +67,7 @@ const Router = (() => {
   }
 })();
 
-function getHTML(url) {
+async function getHTML(url) {
   let result;
 
   // Check if current url matches a route
@@ -75,8 +75,13 @@ function getHTML(url) {
     const content = routes[url];
 
     if (typeof content == 'function') {
-      result = content();
-    } else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
+      result = await content();
+
+      if (!validateElement(result)) {
+        throw new Error(`Function ${content.name} defined for route '${url}' did not return HTMLElement/DocumentFragment.`);
+        return;
+      }
+    } else if (validateElement(content)) {
       result = content.cloneNode(true);
     }
 
@@ -101,20 +106,21 @@ function validateContent(content, fname) {
       throw new Error(`Function passed to Router.${fname}() function will not be provided any arguments.`);
       return false;
     }
-
-    const html = content();
-
-    if (!(html instanceof HTMLElement) && !(html instanceof DocumentFragment)) {
-      throw new Error(`Function passed to Router.${fname}() function must return HTMLElement or DocumentFragment.`);
-      return false;
-    }
   // Otherwise verify that content is an HTMLElement/DocumentFragment
-  } else if (!(content instanceof HTMLElement) && !(content instanceof DocumentFragment)) {
+  } else if (!validateElement(content)) {
     throw new Error(`Second argument passed to Router.${fname}() function must be either HTMLElement/DocumentFragment, either function that returns it.`);
     return false;
   }
 
   return true;
+}
+
+function validateElement(element) {
+  if (!(element instanceof HTMLElement) && !(element instanceof DocumentFragment)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 export default Router;

@@ -2,30 +2,27 @@
 import Router from './router.js';
 
 const log = console.log;
-const main = document.getElementsByTagName('main')[0];
 
-const store = document.getElementById('store').content;
-const signUp = document.getElementById('sign-up').content;
-const signIn = document.getElementById('sign-in').content;
+const store = document.getElementById('store');
+const signUp = document.getElementById('sign-up');
+const signIn = document.getElementById('sign-in');
 
-Router.when('/', store);
-Router.when('/store', store);
-Router.when('/sign-up', signUp);
-Router.when('/sign-in', signIn);
+Router.when('/', fillStoreTemplate);
+Router.when('/store', fillStoreTemplate);
+Router.when('/sign-up', signUp.content);
+Router.when('/sign-in', signIn.content);
 Router.default('/');
 
+async function fillStoreTemplate() {
+  const response = await fetch('/products');
+  const data = await response.json();
 
-// fetch('/products')
-//   .then(response => response.json())
-//   .then((data) => {
-//     main.appendChild(fillTemplate(template, {items: data}));
-//   }).catch((error) => {
-//     console.log('Error fetching data from /products.', error);
-//   })
+  return fillTemplate(store, {items: data});
+}
 
 function fillTemplate(template, data) {
   // Check if template is a node element
-  if (!(nodeType in template) || template.nodeType !== Node.ELEMENT_NODE) {
+  if (!('nodeType' in template) || template.nodeType !== Node.ELEMENT_NODE) {
     throw new Error('First argument passed to "fillTemplate" function must be a node element.');
     return;
   }
