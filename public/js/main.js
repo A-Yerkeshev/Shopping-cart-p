@@ -20,6 +20,7 @@ function toggleCart(ev) {
   const cart = document.getElementById('cart');
 
   cart.classList.toggle('onscreen');
+  cartToggle.classList.toggle('onscreen');
 }
 
 function fillStoreTemplate() {

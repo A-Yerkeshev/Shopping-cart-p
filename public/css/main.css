@@ -200,15 +200,26 @@ nav a {
 
 .cart-toggle {
   position: fixed;
-  width: 4rem;
+  width: 6rem;
   height: 4rem;
   top: 1rem;
   right: 0;
   z-index: 1;
+  transform: translateX(2rem);
+  transition: transform 0.8s;
 
   font-size: 2.2rem;
   background-color: var(--yellow);
   color: var(--black);
   border-right: none;
   border-radius: 0.4rem 0 0 0.4rem;
+  padding: 0 0.4rem 0 0.8rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-toggle.onscreen {
+  transform: translateX(0);
 }
