@@ -13,9 +13,6 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
-Router.onload('/', () => {
-  log('View updated')
-})
 Router.when('/store', fillStoreTemplate);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
@@ -34,7 +31,7 @@ function fetchItems() {
 }
 
 function addToCart(ev) {
-  console.log('added')
+
 }
 
 function toggleCart(ev) {

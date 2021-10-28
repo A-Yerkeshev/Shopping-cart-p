@@ -13,8 +13,18 @@ const Router = (() => {
     return;
   }
 
-  // Draw view on initial load
+  // Draw view on initial load and set view observer
   document.addEventListener('DOMContentLoaded', (ev) => {
+    // Create observer for view and run callbacks assosiated with each route after view is drawn
+    const observer = new MutationObserver((changes) => {
+      changes.forEach((change) => {
+        if (change.addedNodes.length) {
+          runCallbacks();
+        }
+      })
+    })
+    observer.observe(view, {childList: true});
+
     updateView();
   })
 
@@ -56,26 +66,30 @@ const Router = (() => {
 
     // Router.onload() tells which callback to run after the view for given route was drawn
     // Router.default() takes two arguments - url and callback
-    onload(url, callback) {
+    onload(url, ...callbacks) {
       if (!validateUrl(url, 'onload')) return;
-      if (typeof callback !== 'function') {
-        throw new Error(`Second argument passed to Router.onload() function must be a function.`);
-        return;
-      }
-      if (callback.length > 0) {
-        throw new Error(`Callback passed to Router.onload() function will not be provided any arguments.`);
-        return;
-      }
+
+      callbacks.forEach((callback) => {
+        if (typeof callback !== 'function') {
+          throw new Error(`Argument passed to Router.onload() function must be a function or array of functions.`);
+          return;
+        }
+        if (callback.length > 0) {
+          throw new Error(`Callback passed to Router.onload() function will not be provided any arguments.`);
+          return;
+        }
+      })
+
       url = stripUrl(url);
 
       if (routes.hasOwnProperty(url)) {
         if (typeof routes[url] === 'object' && routes[url] !== null) {
 
           if (!routes[url].onload) {
-            routes[url].onload = new Set();
+            routes[url].onload = new Set(callbacks);
           }
 
-          routes[url].onload.add(callback);
+          routes[url].onload = new Set([...routes[url].onload, ...callbacks]);
         } else {
           throw new Error(`Value of routes.${url} is not an object.`);
           return;
@@ -143,16 +157,19 @@ async function updateView() {
 
     view.innerHTML = '';
     view.appendChild(content);
-
-    // Run callbacks for given route
-    const callbacks = routes[hash].onload
-
-    if (callbacks) {
-      callbacks.forEach((callback) => callback());
-    }
   } else {
     // Url did not match any route - redirect to default
     location.hash = '#'+defaultRoute;
+  }
+}
+
+function runCallbacks() {
+  const hash = location.hash.substring(1);
+
+  if (routes[hash].onload && routes[hash].onload instanceof Set) {
+    routes[hash].onload.forEach((callback) => {
+      if (typeof callback == 'function') callback();
+    });
   }
 }
 
