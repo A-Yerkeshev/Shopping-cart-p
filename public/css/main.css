@@ -191,6 +191,11 @@ nav a {
   width: 100vw;
   background-color: var(--yellow);
   transform: translateX(100vw);
+  transition: transform 0.8s;
+}
+
+#cart.onscreen {
+  transform: translateX(0);
 }
 
 .cart-toggle {
@@ -199,6 +204,7 @@ nav a {
   height: 4rem;
   top: 1rem;
   right: 0;
+  z-index: 1;
 
   font-size: 2.2rem;
   background-color: var(--yellow);

@@ -6,12 +6,21 @@ const log = console.log;
 const store = document.getElementById('store');
 const signUp = document.getElementById('sign-up');
 const signIn = document.getElementById('sign-in');
+const cartToggle = document.querySelector('.cart-toggle');
 
 Router.when('/', fillStoreTemplate);
 Router.when('/store', fillStoreTemplate);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
+
+cartToggle.addEventListener('click', toggleCart);
+
+function toggleCart(ev) {
+  const cart = document.getElementById('cart');
+
+  cart.classList.toggle('onscreen');
+}
 
 function fillStoreTemplate() {
   return new Promise((resolve, reject) => {
