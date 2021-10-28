@@ -8,6 +8,10 @@ const signUp = document.getElementById('sign-up');
 const signIn = document.getElementById('sign-in');
 const cartToggle = document.querySelector('.cart-toggle');
 
+const Data = {
+  items: null
+}
+
 Router.when('/', fillStoreTemplate);
 Router.when('/store', fillStoreTemplate);
 Router.when('/sign-up', signUp.content);
@@ -15,6 +19,20 @@ Router.when('/sign-in', signIn.content);
 Router.default('/');
 
 cartToggle.addEventListener('click', toggleCart);
+
+function fetchItems() {
+  return fetch('/products')
+    .then((response) => response.json())
+    .then((data) => {
+      Data.items = data;
+      return data;
+    })
+    .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
+}
+
+function addToCart(ev) {
+  console.log('added')
+}
 
 function toggleCart(ev) {
   const cart = document.getElementById('cart');
@@ -24,12 +42,14 @@ function toggleCart(ev) {
 }
 
 function fillStoreTemplate() {
-  return new Promise((resolve, reject) => {
-    fetch('/products')
-      .then((response) => response.json())
-      .then((data) => resolve(fillTemplate(store, {items: data})))
-      .catch((error) => reject(error))
-  })
+  if (Data.items) {
+    return fillTemplate(store, {items: Data.items});
+  } else {
+    return new Promise((resolve, reject) => {
+      fetchItems()
+        .then((data) => resolve(fillTemplate(store, {items: data})))
+    })
+  }
 }
 
 function fillTemplate(template, data) {
