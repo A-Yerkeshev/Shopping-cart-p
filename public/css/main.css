@@ -1,5 +1,5 @@
 :root {
-  --yellow: #f5f500;
+  --yellow: #fff000;
   --yellow-pale: #ffff99;
   --yellow-shade: #999900;
   --black: #403530;
@@ -27,7 +27,10 @@ html {
 }
 
 body {
+  width: 100vw;
   background-color: var(--white);
+  position: relative;
+  overflow: hidden;
 }
 
 /***************************************/
@@ -78,7 +81,7 @@ nav a {
   margin: 0 1rem;
 }
 
-/*********************************************/
+/*** STORE ******************************************/
 
 .item {
   width: 70%;
@@ -121,13 +124,10 @@ nav a {
   cursor: pointer;
 }
 
-/********************************************/
+/*** SINGING PAGES *****************************************/
 .form h2 {
   font-size: 1.8rem;
   text-align: center;
-/*  background-color: var(--yellow-pale);
-  background-image: linear-gradient();
-  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);*/
   width: 55%;
   margin: auto;
   padding: 0 0 0.4rem 0;
@@ -144,18 +144,18 @@ nav a {
   z-index: -1;
   background-image: linear-gradient(
     to right,
-    var(--yellow-pale), var(--yellow-pale) 3%,
+    var(--yellow), var(--yellow) 3%,
     var(--white) 3%, var(--white) 6%,
-    var(--yellow-pale) 6%, var(--yellow-pale) 14%,
+    var(--yellow) 6%, var(--yellow) 14%,
     var(--white) 14%, var(--white) 19%,
 
-    var(--yellow-pale) 19%, var(--yellow-pale) 81%,
+    var(--yellow) 19%, var(--yellow) 81%,
 
     var(--white) 81%, var(--white) 86%,
-    var(--yellow-pale) 86%, var(--yellow-pale) 94%,
+    var(--yellow) 86%, var(--yellow) 94%,
     var(--white) 94%, var(--white) 97%,
-    var(--yellow-pale) 97%, var(--yellow-pale));
-  transform: skew(-15deg);
+    var(--yellow) 97%, var(--yellow));
+  transform: skew(-20deg);
 }
 
 .form form {
@@ -181,4 +181,14 @@ nav a {
   border: none;
   color: var(--black);
   box-shadow: 0 1px 4px var(--yellow-shade);
+}
+
+/*** CART *********************************************/
+#cart {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100vw;
+  background-color: var(--yellow);
+  transform: translateX(100vw);
 }
