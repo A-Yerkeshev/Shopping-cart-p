@@ -111,6 +111,16 @@ nav a {
   color: red;
 }
 
+.add {
+  background-color: var(--yellow);
+  font-size: 1.2rem;
+  float: right;
+  clear: both;
+  padding: 0.4rem;
+  border: 1px solid var(--black);
+  cursor: pointer;
+}
+
 /********************************************/
 .form h2 {
   font-size: 1.8rem;
