@@ -43,6 +43,8 @@ const Router = (() => {
       }
 
       routes[url] = content;
+
+      return this;
     },
 
     // Router.default() specifies the route to redirect, if current url did not match any route
@@ -56,6 +58,8 @@ const Router = (() => {
       }
 
       defaultRoute = url;
+
+      return this;
     }
   }
 })();
