@@ -24,13 +24,13 @@ html {
   font-size: 32px;
   font-family: Verdana, Geneva, sans-serif;
   color: var(--black);
+  overflow-x: hidden;
 }
 
 body {
-  width: 100vw;
   background-color: var(--white);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /***************************************/
@@ -191,4 +191,13 @@ nav a {
   width: 100vw;
   background-color: var(--yellow);
   transform: translateX(100vw);
+}
+
+.cart-toggle {
+  position: fixed;
+  width: 4rem;
+  height: 4rem;
+  top: 15rem;
+  left: -4rem;
+  background-color: var(--yellow);
 }

@@ -49,9 +49,8 @@ client.connect((error) => {
   }
 })
 
-// app.set('view engine', 'ejs');
-
 app.use('/', express.static('public'));
+app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-free/'))
 
 app.get('/products', (request, response) => {
   client.query('SELECT * from products', (error, data) => {
