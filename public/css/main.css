@@ -113,8 +113,39 @@ nav a {
 
 /********************************************/
 .form h2 {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   text-align: center;
+/*  background-color: var(--yellow-pale);
+  background-image: linear-gradient();
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);*/
+  width: 55%;
+  margin: auto;
+  padding: 0 0 0.4rem 0;
+  position: relative;
+}
+
+.form h2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  background-image: linear-gradient(
+    to right,
+    var(--yellow-pale), var(--yellow-pale) 3%,
+    var(--white) 3%, var(--white) 6%,
+    var(--yellow-pale) 6%, var(--yellow-pale) 14%,
+    var(--white) 14%, var(--white) 19%,
+
+    var(--yellow-pale) 19%, var(--yellow-pale) 81%,
+
+    var(--white) 81%, var(--white) 86%,
+    var(--yellow-pale) 86%, var(--yellow-pale) 94%,
+    var(--white) 94%, var(--white) 97%,
+    var(--yellow-pale) 97%, var(--yellow-pale));
+  transform: skew(-15deg);
 }
 
 .form form {
@@ -131,10 +162,12 @@ nav a {
 }
 
 .form input[type="submit"] {
+  font-family: var(--orbitron);
+  font-weight: bold;
   width: 35%;
   margin: 1rem auto 0;
   padding: 0.4rem;
-  background-color: var(--yellow-pale);
+  background-color: var(--yellow);
   border: none;
   color: var(--black);
   box-shadow: 0 1px 4px var(--yellow-shade);
