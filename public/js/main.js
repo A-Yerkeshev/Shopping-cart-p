@@ -13,6 +13,9 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
+Router.onload('/', () => {
+  log('View updated')
+})
 Router.when('/store', fillStoreTemplate);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);

@@ -36,13 +36,9 @@ const Router = (() => {
     when: function(url, content) {
       if (!validateUrl(url, 'when')) return;
       if (!validateContent(content, 'when')) return;
+      url = stripUrl(url);
 
-      // Strip off first '/' in url if present
-      if (url.charAt(0) == '/') {
-        url = url.substring(1);
-      }
-
-      routes[url] = content;
+      routes[url] = { content };
 
       return this;
     },
@@ -51,15 +47,43 @@ const Router = (() => {
     // Router.default() takes one argument - default url like '/' or '/products' or 'products'
     default: function(url) {
       if (!validateUrl(url, 'default')) return;
-
-      // Strip off first '/' in url if present
-      if (url.charAt(0) == '/') {
-        url = url.substring(1);
-      }
+      url = stripUrl(url);
 
       defaultRoute = url;
 
       return this;
+    },
+
+    // Router.onload() tells which callback to run after the view for given route was drawn
+    // Router.default() takes two arguments - url and callback
+    onload(url, callback) {
+      if (!validateUrl(url, 'onload')) return;
+      if (typeof callback !== 'function') {
+        throw new Error(`Second argument passed to Router.onload() function must be a function.`);
+        return;
+      }
+      if (callback.length > 0) {
+        throw new Error(`Callback passed to Router.onload() function will not be provided any arguments.`);
+        return;
+      }
+      url = stripUrl(url);
+
+      if (routes.hasOwnProperty(url)) {
+        if (typeof routes[url] === 'object' && routes[url] !== null) {
+
+          if (!routes[url].onload) {
+            routes[url].onload = new Set();
+          }
+
+          routes[url].onload.add(callback);
+        } else {
+          throw new Error(`Value of routes.${url} is not an object.`);
+          return;
+        }
+      } else {
+        throw new Error(`Route '${url}' is not defined. Use Router.when() to define new route.`);
+        return;
+      }
     }
   }
 })();
@@ -102,7 +126,7 @@ async function updateView() {
   const hash = location.hash.substring(1);
 
   if (routes.hasOwnProperty(hash)) {
-    let content = routes[hash];
+    let content = routes[hash].content;
 
     if (typeof content == 'function') {
       content = await content();
@@ -119,10 +143,25 @@ async function updateView() {
 
     view.innerHTML = '';
     view.appendChild(content);
+
+    // Run callbacks for given route
+    const callbacks = routes[hash].onload
+
+    if (callbacks) {
+      callbacks.forEach((callback) => callback());
+    }
   } else {
     // Url did not match any route - redirect to default
     location.hash = '#'+defaultRoute;
   }
+}
+
+function stripUrl(url) {
+  if (url.charAt(0) == '/') {
+    url = url.substring(1);
+  }
+
+  return url;
 }
 
 export default Router;
