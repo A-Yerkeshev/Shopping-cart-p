@@ -197,7 +197,12 @@ nav a {
   position: fixed;
   width: 4rem;
   height: 4rem;
-  top: 15rem;
-  left: -4rem;
+  top: 1rem;
+  right: 0;
+
+  font-size: 2.2rem;
   background-color: var(--yellow);
+  color: var(--black);
+  border-right: none;
+  border-radius: 0.4rem 0 0 0.4rem;
 }
