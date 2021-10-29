@@ -3,10 +3,11 @@ import Router from './router.js';
 
 const log = console.log;
 
-
-const store = document.getElementById('store');
-const signUp = document.getElementById('sign-up');
-const signIn = document.getElementById('sign-in');
+const store = document.getElementById('store-template');
+const signUp = document.getElementById('sign-up-template');
+const signIn = document.getElementById('sign-in-template');
+const cartTpl = document.getElementById('cart-template');
+const cartView = document.getElementById('cart');
 const cartToggle = document.querySelector('.cart-toggle');
 
 // Number of days after cart cookie will expire
@@ -16,23 +17,44 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
-Router.onload('/', addStoreEventListeners);
+Router.onload('/', addStoreEventListeners, fillCart);
 Router.when('/store', fillStoreTemplate);
-Router.onload('/store', addStoreEventListeners);
+Router.onload('/store', addStoreEventListeners, fillCart);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
 
 cartToggle.addEventListener('click', toggleCart);
 
-function fetchItems() {
-  return fetch('/products')
-    .then((response) => response.json())
-    .then((data) => {
-      Data.items = data;
-      return data;
+// Draw shopping cart items
+function fillCart() {
+  const cart = getCookie('cart');
+  const items = [];
+
+  if (cart) {
+    cart.forEach((entry) => {
+      let item;
+
+      // Find item by id
+      for (let i=0; i<(cart.length); i++) {
+        if (Data.items[i].id == entry.id) {
+          item = {
+            name: Data.items[i].name,
+            image: Data.items[i].image,
+            price: Data.items[i].price,
+            quantity: entry.quantity
+          }
+          break;
+        }
+      }
+
+      if (item) {
+        items.push(item);
+      }
     })
-    .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
+  }
+
+  cartView.appendChild(fillTemplate(cartTpl, { items }));
 }
 
 function addToCart(ev) {
@@ -99,6 +121,16 @@ function addStoreEventListeners() {
   buttons.forEach((button) => {
     button.addEventListener('click', addToCart);
   })
+}
+
+function fetchItems() {
+  return fetch('/products')
+    .then((response) => response.json())
+    .then((data) => {
+      Data.items = data;
+      return data;
+    })
+    .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
 }
 
 function getCookie(name) {
