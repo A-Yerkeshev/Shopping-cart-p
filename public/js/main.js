@@ -13,7 +13,9 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
+Router.onload('/', addStoreEventListeners);
 Router.when('/store', fillStoreTemplate);
+Router.onload('/store', addStoreEventListeners);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
@@ -31,7 +33,7 @@ function fetchItems() {
 }
 
 function addToCart(ev) {
-
+  log(`Item ${ev.target} added`);
 }
 
 function toggleCart(ev) {
@@ -47,9 +49,17 @@ function fillStoreTemplate() {
   } else {
     return new Promise((resolve, reject) => {
       fetchItems()
-        .then((data) => resolve(fillTemplate(store, {items: data})))
+        .then((data) => resolve(fillTemplate(store, {items: data})));
     })
   }
+}
+
+function addStoreEventListeners() {
+  const buttons = Array.from(document.getElementsByClassName('add'));
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', addToCart);
+  })
 }
 
 function fillTemplate(template, data) {
