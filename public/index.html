@@ -82,10 +82,11 @@
 <template id="cart-template">
   <repeat for="i of items">
     <div class="cart-item">
+      <h3>{{ name }}</h3>
       <img src="/img/{{ image }}" alt="{{ name }}">
-      <h2>{{ name }}</h2>
       <span>{{ price }}</span>
-      <span>{{ quantity }}</span>
+      <input type="number" name="price" value="{{ quantity }}">
+      <button><i class="fas fa-times"></i></button>
     </div>
   </repeat>
 </template>

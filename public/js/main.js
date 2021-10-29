@@ -17,9 +17,9 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
-Router.onload('/', addStoreEventListeners, fillCart);
+Router.onload('/', addStoreEventListeners, displayCart);
 Router.when('/store', fillStoreTemplate);
-Router.onload('/store', addStoreEventListeners, fillCart);
+Router.onload('/store', addStoreEventListeners, displayCart);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
@@ -27,7 +27,7 @@ Router.default('/');
 cartToggle.addEventListener('click', toggleCart);
 
 // Draw shopping cart items
-function fillCart() {
+function displayCart() {
   const cart = getCookie('cart');
   const items = [];
 
