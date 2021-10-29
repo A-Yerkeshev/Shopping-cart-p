@@ -3,11 +3,14 @@ import Router from './router.js';
 
 const log = console.log;
 
+
 const store = document.getElementById('store');
 const signUp = document.getElementById('sign-up');
 const signIn = document.getElementById('sign-in');
 const cartToggle = document.querySelector('.cart-toggle');
 
+// Number of days after cart cookie will expire
+const expDays = 5;
 const Data = {
   items: null
 }
@@ -33,7 +36,63 @@ function fetchItems() {
 }
 
 function addToCart(ev) {
-  log(`Item ${ev.target} added`);
+  const itemId = ev.target.getAttribute('data-id');
+  let cookies = document.cookie;
+  let cart;
+
+  // Check if application has any cookies
+  // If it does - try to find cart cookie
+  if (cookies) {
+    cookies = cookies.split(';');
+
+    for (let i=0; i<(cookies.length); i++) {
+      const split = cookies[i].split('=');
+      const key = split[0].trim();
+
+      if (key == 'cart') {
+        cart = JSON.parse(split[1].trim());
+        break;
+      }
+    }
+  }
+
+  // If cart cookie was found:
+  if (cart) {
+    // Check if selected item already present in the cart
+    let match;
+
+    for (let i=0; i<(cart.length); i++) {
+      log(cart.length);
+      if (cart[i].id == itemId) {
+        match = cart[i];
+
+        break;
+      }
+    }
+
+    if (match) {
+      // If it is, increase the quantity
+      match.quantity++;
+    } else {
+      // Otherwise add new entry to cart
+      cart.push({
+        id: itemId,
+        quantity: 1
+      })
+    }
+  } else {
+    // Otherwise create cart and add frist item
+    cart = [{
+      id: itemId,
+      quantity: 1
+    }]
+  }
+
+  // Update cart cookie
+  const date = new Date();
+  date.setTime(date.getTime() + 1000*60*60*24*expDays);
+
+  document.cookie = "cart=" + JSON.stringify(cart) + ';' + date.toUTCString();
 }
 
 function toggleCart(ev) {
@@ -60,6 +119,14 @@ function addStoreEventListeners() {
   buttons.forEach((button) => {
     button.addEventListener('click', addToCart);
   })
+}
+
+function getCookie(key) {
+
+}
+
+function setCookie(key, value, expirity) {
+
 }
 
 function fillTemplate(template, data) {
