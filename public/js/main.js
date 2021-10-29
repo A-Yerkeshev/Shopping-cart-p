@@ -37,24 +37,8 @@ function fetchItems() {
 
 function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
-  let cookies = document.cookie;
-  let cart;
 
-  // Check if application has any cookies
-  // If it does - try to find cart cookie
-  if (cookies) {
-    cookies = cookies.split(';');
-
-    for (let i=0; i<(cookies.length); i++) {
-      const split = cookies[i].split('=');
-      const key = split[0].trim();
-
-      if (key == 'cart') {
-        cart = JSON.parse(split[1].trim());
-        break;
-      }
-    }
-  }
+  let cart = getCookie('cart');
 
   // If cart cookie was found:
   if (cart) {
@@ -62,7 +46,6 @@ function addToCart(ev) {
     let match;
 
     for (let i=0; i<(cart.length); i++) {
-      log(cart.length);
       if (cart[i].id == itemId) {
         match = cart[i];
 
@@ -89,10 +72,7 @@ function addToCart(ev) {
   }
 
   // Update cart cookie
-  const date = new Date();
-  date.setTime(date.getTime() + 1000*60*60*24*expDays);
-
-  document.cookie = "cart=" + JSON.stringify(cart) + ';' + date.toUTCString();
+  setCookie('cart', cart, 1000*60*60*24*expDays);
 }
 
 function toggleCart(ev) {
@@ -121,12 +101,49 @@ function addStoreEventListeners() {
   })
 }
 
-function getCookie(key) {
+function getCookie(name) {
+  if (typeof name !== 'string') {
+    throw new Error('Argument passed to getCookie() function must be of string type.');
+    return;
+  }
 
+  let cookies = document.cookie;
+  let result;
+
+  if (cookies) {
+    cookies = cookies.split(';');
+
+    for (let i=0; i<(cookies.length); i++) {
+      const split = cookies[i].split('=');
+      const key = split[0].trim();
+
+      if (key == name) {
+        result = JSON.parse(split[1].trim());
+        break;
+      }
+    }
+  }
+
+  return result;
 }
 
-function setCookie(key, value, expirity) {
+function setCookie(key, value='', expirity) {
+  if (typeof key !== 'string') {
+    throw new Error('First argument passed to setCookie() function must be of string type.');
+    return;
+  }
+  if (typeof expirity !== 'number') {
+    throw new Error('Third argument passed to setCookie() function must be of number type.');
+    return;
+  }
 
+  const date = new Date();
+
+  if (expirity) {
+    date.setTime(date.getTime() + expirity);
+  }
+
+  document.cookie = key + "=" + JSON.stringify(value) + ';' + date.toUTCString();
 }
 
 function fillTemplate(template, data) {
