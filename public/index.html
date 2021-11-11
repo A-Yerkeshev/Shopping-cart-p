@@ -27,12 +27,19 @@
     </main>
   </div>
 
-  <section id="cart" class="onscreen">
+  <section id="cart" class="">
   </section>
   <script type="module" src="js/main.js"></script>
 </body>
 
 <template id="store-template">
+
+  <if cond="true">
+    True
+  </if><else>
+    False
+  </else>
+
   <repeat for="i of items">
     <insert template="item-template"/>
   </repeat>
