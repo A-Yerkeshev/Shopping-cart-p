@@ -102,6 +102,53 @@ function fillTemplate(template, data) {
   //*********************************/
   //*********************************/
 
+  // Check for if statements
+
+  //*********************************/
+  //*********************************/
+  const ifTags = template.content.querySelectorAll('if');
+
+  for (let ift of ifTags) {
+    let conditions = ift.getAttribute('cond');
+
+    if (!conditions) {
+      throw new Error(`<if> tag requires a "cond" attribute.`);
+      return
+    }
+
+    const elset = ift.nextSibling;
+    const parent = ift.parentNode;
+    const evl = evaluateStringConditions(conditions, data);
+    const template = document.createElement('template');
+
+    if (evl === false) {
+      ift.remove();
+
+      if (elset.tagName == 'ELSE') {
+        const content = elset.childNodes;
+
+        for (let node of content) {
+          template.content.append(node);
+        }
+
+        parent.replaceChild(fillTemplate(template, data), elset);
+      }
+    } else {
+      if (elset.tagName == 'ELSE') elset.remove();
+
+      const content = ift.childNodes;
+
+      for (let node of content) {
+        template.content.append(node);
+      }
+
+      parent.replaceChild(fillTemplate(template, data), ift);
+    }
+  }
+
+  //*********************************/
+  //*********************************/
+
   // Check for insert statements
 
   //*********************************/
@@ -128,7 +175,13 @@ function fillTemplate(template, data) {
     insert.remove();
   }
 
+  //*********************************/
+  //*********************************/
+
   // Replace template variables with values
+
+  //*********************************/
+  //*********************************/
   let string = template.innerHTML;
   let start = string.indexOf('{{');
   let end = string.indexOf('}}');
@@ -145,25 +198,6 @@ function fillTemplate(template, data) {
       throw new Error(`Cannot fill template. Variable "${varname}" is not defined.`);
       return;
     }
-  }
-
-  //*********************************/
-  //*********************************/
-
-  // Check for if statements
-
-  //*********************************/
-  //*********************************/
-  const ifTags = template.content.querySelectorAll('if');
-
-  for (let ift of ifTags) {
-    let conditions = ift.getAttribute('cond');
-
-    if (!conditions) {
-      throw new Error(`<if> tag requires a "cond" attribute.`);
-      return
-    }
-
   }
 
   return document.createRange().createContextualFragment(string);
@@ -277,6 +311,11 @@ function evaluateSingleStringCondition(string, data) {
       } else {
         // If the value is neither boolean, neither string, neither variable, attempt to convert it into number
         left = parseFloat(left);
+
+        if (isNaN(left)) {
+          throw new Error(`Failed to determine the data type of the condition value. Note that variable names should be wrapped in duble curly braces {{}} and string values in single '' or double "" quotes.`);
+          return;
+        }
       }
     }
   }
