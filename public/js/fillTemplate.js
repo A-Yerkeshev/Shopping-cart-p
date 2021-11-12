@@ -34,7 +34,7 @@ import { stringToPrimitive, searchObjectByString } from './stringConverter.js';
 // 3. Comparison to non-primitive value -- <if cond="{{ func }} === myFunc"> -- is invalid
 // 4. Mathematical operations -- <if cond="{{ num + 3 }} > 7"> -- is invalid
 
-const log=console.log;
+const log = console.log;
 
 function fillTemplate(template, data) {
   // Check if template is a node element
@@ -47,6 +47,8 @@ function fillTemplate(template, data) {
     throw new Error('Second argument passed to "fillTemplate" function must be an object.');
     return;
   }
+
+  template = template.cloneNode(true);
 
   //*********************************/
   //*********************************/
@@ -111,8 +113,7 @@ function fillTemplate(template, data) {
     data[varname] = undefined;
 
     // 4. Replace <repeat> tag with actual content
-    repeat.parentNode.insertBefore(output, repeat);
-    repeat.remove();
+    repeat.replaceWith(output);
   }
 
   //*********************************/
@@ -147,7 +148,7 @@ function fillTemplate(template, data) {
           template.content.append(node);
         }
 
-        parent.replaceChild(fillTemplate(template, data), elset);
+        elset.replaceWith(fillTemplate(template, data));
       }
     } else {
       if (elset.tagName == 'ELSE') elset.remove();
@@ -158,7 +159,7 @@ function fillTemplate(template, data) {
         template.content.append(node);
       }
 
-      parent.replaceChild(fillTemplate(template, data), ift);
+      ift.replaceWith(fillTemplate(template, data));
     }
   }
 
@@ -187,8 +188,7 @@ function fillTemplate(template, data) {
 
     const content = fillTemplate(tpl, data);
 
-    insert.parentNode.insertBefore(content, insert);
-    insert.remove();
+    insert.replaceWith(content);
   }
 
   //*********************************/

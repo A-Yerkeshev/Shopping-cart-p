@@ -19,17 +19,16 @@ const Data = {
 }
 
 Router.when('/', fillStoreTemplate);
-Router.onload('/', addStoreEventListeners, displayCart);
+Router.onload('/', addStoreEventListeners);
 Router.when('/store', fillStoreTemplate);
-Router.onload('/store', addStoreEventListeners, displayCart);
+Router.onload('/store', addStoreEventListeners);
 Router.when('/sign-up', signUp.content);
 Router.when('/sign-in', signIn.content);
 Router.default('/');
 
 cartToggle.addEventListener('click', toggleCart);
 
-// Draw shopping cart items
-function displayCart() {
+function updateCart() {
   const cart = getCookie('cart');
   const items = [];
 
@@ -41,6 +40,7 @@ function displayCart() {
       for (let i=0; i<(cart.length); i++) {
         if (Data.items[i].id == entry.id) {
           item = {
+            id: Data.items[i].id,
             name: Data.items[i].name,
             image: Data.items[i].image,
             price: Data.items[i].price,
@@ -56,12 +56,12 @@ function displayCart() {
     })
   }
 
+  cartView.innerHTML = '';
   cartView.appendChild(fillTemplate(cartTpl, { items }));
 }
 
 function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
-
   let cart = getCookie('cart');
 
   // If cart cookie was found:
@@ -97,6 +97,24 @@ function addToCart(ev) {
 
   // Update cart cookie
   setCookie('cart', cart, 1000*60*60*24*expDays);
+  updateCart();
+}
+
+function removeFromCart(ev) {
+  const itemId = ev.target.parentNode.getAttribute('data-id');
+  let cart = getCookie('cart');
+
+  for (let i=0; i<(cart.length); i++) {
+    if (cart[i].id == itemId) {
+      cart.splice(cart[i], 1);
+
+      break;
+    }
+  }
+  log(cart)
+
+  setCookie('cart', cart, 1000*60*60*24*expDays);
+  updateCart();
 }
 
 function toggleCart(ev) {
@@ -125,11 +143,21 @@ function addStoreEventListeners() {
   })
 }
 
+function addCartEventListeners() {
+  const buttons = Array.from(document.getElementsByClassName('remove'));
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', removeFromCart);
+  })
+}
+
 function fetchItems() {
   return fetch('/products')
     .then((response) => response.json())
     .then((data) => {
       Data.items = data;
+      updateCart();
+      addCartEventListeners();
       return data;
     })
     .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});

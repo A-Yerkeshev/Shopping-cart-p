@@ -27,7 +27,7 @@
     </main>
   </div>
 
-  <section id="cart" class="">
+  <section id="cart" class="onscreen">
   </section>
   <script type="module" src="js/main.js"></script>
 </body>
@@ -85,8 +85,8 @@
       <h3>{{ item.name }}</h3>
       <img src="/img/{{ item.image }}" alt="{{ item.name }}">
       <span>{{ item.price }}</span>
-      <input type="number" name="price" value="{{ item.quantity }}">
-      <button><i class="fas fa-times"></i></button>
+      <input type="number" value="{{ item.quantity }}">
+      <button class="remove" data-id="{{ item.id }}"><i class="fas fa-times"></i></button>
     </div>
   </repeat>
 </template>
