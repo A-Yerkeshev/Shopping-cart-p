@@ -58,7 +58,7 @@ function fillTemplate(template, data) {
   const repeatTags = template.content.querySelectorAll('repeat');
 
   for (let repeat of repeatTags) {
-    // Find iterated array
+    // 1. Find iterated array
     const attr = repeat.getAttribute('for');
     if (!attr) {
       throw new Error(`<repeat> tag expects "for" attribute.`);
@@ -67,7 +67,7 @@ function fillTemplate(template, data) {
 
     const ofI = attr.indexOf(' of ');
     if (ofI == -1) {
-      throw new Error(`<repeat> tag's "for" attribute must have following syntax: for="/value/ of /iterable/".`);
+      throw new Error(`<repeat> tag's "for" attribute must have following syntax: for="/variable/ of /iterable/".`);
       return;
     }
 
@@ -83,8 +83,17 @@ function fillTemplate(template, data) {
 
     // By this point iterable is found and has correct type
 
-    // Iterate through iterable, fill new template on every iteration, append result to output
+    // 2. Get variable name
+    const varname = attr.substring(0, ofI).trim();
+
+    // 3. Iterate through iterable, fill new template on every iteration, append result to output
     let output = new DocumentFragment();
+
+    // 3.1 Create new property on data object with name equal to variable name
+    if (varname in data && data[varname] !== undefined) {
+      throw new Error(`Data object already has non-empty property "${varname}". Choose another variable name in "for=" attribute`);
+      return;
+    }
 
     iterable.forEach((element) => {
       const template = document.createElement('template');
@@ -94,10 +103,14 @@ function fillTemplate(template, data) {
         template.content.append(node.cloneNode(true));
       }
 
-      output.append(fillTemplate(template, element));
+      data[varname] = element;
+
+      output.append(fillTemplate(template, data));
     })
 
-    // Replace <repeat> tag with actual content
+    data[varname] = undefined;
+
+    // 4. Replace <repeat> tag with actual content
     repeat.parentNode.insertBefore(output, repeat);
     repeat.remove();
   }

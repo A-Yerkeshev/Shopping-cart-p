@@ -33,7 +33,7 @@
 </body>
 
 <template id="store-template">
-  <repeat for="i of items">
+  <repeat for="item of items">
     <insert template="item-template"/>
   </repeat>
 </template>
@@ -70,22 +70,22 @@
 
 <template id="item-template">
   <div class="item">
-    <img src="/img/{{ image }}" alt="{{ name }}">
+    <img src="/img/{{ item.image }}" alt="{{ item.name }}">
     <div class="item-descr">
-      <h2>{{ name }}</h2>
-      <span class="price">{{ price }}</span>
-      <button class="add" data-id="{{ id }}">Add to cart</button>
+      <h2>{{ item.name }}</h2>
+      <span class="price">{{ item.price }}</span>
+      <button class="add" data-id="{{ item.id }}">Add to cart</button>
     </div>
   </div>
 </template>
 
 <template id="cart-template">
-  <repeat for="i of items">
+  <repeat for="item of items">
     <div class="cart-item">
-      <h3>{{ name }}</h3>
-      <img src="/img/{{ image }}" alt="{{ name }}">
-      <span>{{ price }}</span>
-      <input type="number" name="price" value="{{ quantity }}">
+      <h3>{{ item.name }}</h3>
+      <img src="/img/{{ item.image }}" alt="{{ item.name }}">
+      <span>{{ item.price }}</span>
+      <input type="number" name="price" value="{{ item.quantity }}">
       <button><i class="fas fa-times"></i></button>
     </div>
   </repeat>
