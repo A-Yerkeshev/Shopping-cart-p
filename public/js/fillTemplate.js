@@ -11,14 +11,15 @@
 //
 // Other templates can be inserted using <insert> tag like so:
 // <insert template="tpl-1"/> -- tpl-1 is an id of template tag
+//
 // <template id="tpl-1">
 // </template>
 
 // Conditions are handled using <if> and <else> tags like so:
 // <if cond="{{ num }} > 3">
-//   {{ content if true }}
+//   content if true
 // </if><else>
-//   {{ content if false }}
+//   content if false
 // </else>
 // Note that <else> tag must next sibling of <if> tag.
 //
@@ -29,7 +30,6 @@
 // 2. Parenthesis -- <if cond="{{ num }} == 5 || ({{ num }} > 3 && {{ num }} < 7)"> -- is invalid
 // 3. Comparison to non-primitive value -- <if cond="{{ func }} === myFunc"> -- is invalid
 // 4. Mathematical operations -- <if cond="{{ num + 3 }} > 7"> -- is invalid
-// 5. Access of properties and methods -- <if cond="{{ data.number }} > 3"> -- is invalid
 
 const log=console.log;
 
@@ -370,6 +370,107 @@ function evaluateSingleStringCondition(string, data) {
   } else {
     return Boolean(left);
   }
+}
+
+function getValue(varname, data) {
+  if (typeof varname !== 'string') {
+    throw new Error('First argument passed to "getValue" function must be a string.');
+    return;
+  }
+  if (typeof data !== 'object') {
+    throw new Error('Second argument passed to "getValue" function must be an object.');
+    return;
+  }
+  varname = varname.trim();
+
+  // 1. Check if variable string contains ".". In this case, treat variable as object
+  const dot = varname.indexOf('.');
+  if (dot > -1) {
+    // 1.1 Split varname into object name and property/method name
+    const left = varname.substring(0, dot);
+    const right = varname.substring(dot+1);
+    const obj = data[left];
+
+    // 1.2 Check if variable is an object
+    if (typeof obj !== 'object') {
+      throw new Error(`"${left}" is not an object.`);
+      return;
+    }
+
+    // 1.3 Determine whether right part is meant to be property or method name
+    if (right.endsWith(')')) {
+
+
+
+
+      // Method name
+      // 1.4 Separate method name from parentheses
+      // const firstP = right.indexOf('(');
+
+      // if (firstP == -1) {
+      //   throw new Error(`Missing opening parenthesis`)
+      // }
+
+      // const methodName = right.substring(0, )
+
+
+      // if ((right in obj) == false) {
+      //   throw new Error(`Mehtod "${right}" does not exist on "${left}" object.`);
+      //   return;
+      // }
+
+
+
+
+    } else {
+      // Property name
+      // 1.4 Get the value of the property
+      if ((right in obj) == false) {
+        throw new Error(`Property "${right}" does not exist on "${left}" object.`);
+        return;
+      }
+      return obj[right];
+    }
+  }
+
+  // 2. Check if variable string contains "[]". In this case, treat variable as array, object or string
+  const oBracket = varname.indexOf('[');
+  const cBracket = varname.indexOf(']');
+
+  if (oBracket > -1) {
+    if (cBracket == -1) {
+      throw new Error(`Missing closing square bracket for "${varname}".`);
+      return;
+    }
+
+    // 2.1 Get value between brackets
+    let between = varname.substring(oBracket+1, cBracket);
+    varname = varname.substring(0, oBracket);
+
+    // 2.2 If it is a string - treat it as property name of an object
+    if (between.startsWith("'") && between.endsWith("'") ||
+      between.startsWith('"') && between.endsWith('"')) {
+
+      between = between.slice(1, -1);
+      const obj = data[varname];
+
+      if (typeof obj !== 'object') {
+        throw new Error(`Cannot access property "${between}" of "${varname}". "${varname}" is not an object.`);
+        return;
+      }
+
+      if ((between in obj) == false) {
+        throw new Error(`Property "${between}" does not exist on "${varname}" object.`);
+        return;
+      }
+
+      return data[varname][between];
+    }
+
+    // 2.3 If it is a number - treat it as index of element in array or index of character in string
+  }
+
+  // 3. Check if variable string contains "()". In this case, treat variable as function
 }
 
 export default fillTemplate;
