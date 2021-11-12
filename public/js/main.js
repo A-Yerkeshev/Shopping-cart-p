@@ -37,7 +37,7 @@ function updateCart() {
       let item;
 
       // Find item by id
-      for (let i=0; i<(cart.length); i++) {
+      for (let i=0; i<(Data.items.length); i++) {
         if (Data.items[i].id == entry.id) {
           item = {
             id: Data.items[i].id,
@@ -58,6 +58,7 @@ function updateCart() {
 
   cartView.innerHTML = '';
   cartView.appendChild(fillTemplate(cartTpl, { items }));
+  addCartEventListeners();
 }
 
 function addToCart(ev) {
@@ -111,7 +112,6 @@ function removeFromCart(ev) {
       break;
     }
   }
-  log(cart)
 
   setCookie('cart', cart, 1000*60*60*24*expDays);
   updateCart();
@@ -157,7 +157,6 @@ function fetchItems() {
     .then((data) => {
       Data.items = data;
       updateCart();
-      addCartEventListeners();
       return data;
     })
     .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
