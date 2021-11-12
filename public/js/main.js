@@ -107,8 +107,7 @@ function removeFromCart(ev) {
 
   for (let i=0; i<(cart.length); i++) {
     if (cart[i].id == itemId) {
-      cart.splice(cart[i], 1);
-
+      cart.splice(i, 1);
       break;
     }
   }
