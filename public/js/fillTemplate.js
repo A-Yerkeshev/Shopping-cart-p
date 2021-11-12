@@ -465,9 +465,30 @@ function getValue(varname, data) {
       }
 
       return data[varname][between];
-    }
+    } else {
 
     // 2.3 If it is a number - treat it as index of element in array or index of character in string
+      const index = parseInt(between);
+
+      if (isNaN(index)) {
+        throw new Error(`Value between square brackets should be either integer, either string wrapped in single or double quotes.`);
+        return;
+      }
+
+      const iter = data[varname];
+
+      if (typeof iter !== 'string' && !Array.isArray(iter)) {
+        throw new Error(`"${varname}" is neither string, neither an array. Cannot get element at index ${index}.`);
+        return;
+      }
+
+      if (index > iter.length - 1) {
+        throw new Error(`"${varname}" is out of range. Index is greater than ${varname}'s length`);
+        return;
+      }
+
+      return iter[index];
+    }
   }
 
   // 3. Check if variable string contains "()". In this case, treat variable as function
