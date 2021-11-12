@@ -191,16 +191,12 @@ function fillTemplate(template, data) {
 
   while (start >= 0 && end >= 0) {
     const varname = string.substring(start+2, end).trim();
+    const value = searchObjectByString(varname, data);
 
-    if (data[varname]) {
-      string = string.substring(0, start) + String(data[varname]) + string.substring(end+2);
+    string = string.substring(0, start) + String(value) + string.substring(end+2);
 
-      start = string.indexOf('{{');
-      end = string.indexOf('}}');
-    } else {
-      throw new Error(`Cannot fill template. Variable "${varname}" is not defined.`);
-      return;
-    }
+    start = string.indexOf('{{');
+    end = string.indexOf('}}');
   }
 
   return document.createRange().createContextualFragment(string);
@@ -290,62 +286,24 @@ function evaluateSingleStringCondition(string, data) {
   // 3. If condition does not contain operator, assign whole string to "left" variable
   if (!operator) left = string;
 
-  // 4. Replace boolean strings with actual boolean values
-  if (left === 'true') left = true;
-  if (left === 'false') left = false;
+  // 4. Check if left side contains {{ }}. If it does - get the value
+  if (left.startsWith('{{') && left.endsWith('}}')) {
+    const varname = left.slice(2, -2).trim();
 
-  // 5. Strip off quotes around string values
-  if (typeof left == 'string') {
-    if (left.startsWith("'") && left.endsWith("'") ||
-      left.startsWith('"') && left.endsWith('"')) {
-      left = left.slice(1,-1);
-    } else {
-
-      // 5. Replace variable names with values
-      if (left.startsWith('{{') && left.endsWith('}}')) {
-        const varname = left.slice(2, -2).trim();
-
-        left = data[varname];
-
-        if (left === undefined) {
-          throw new Error(`Cannot evaluate condition. Variable "${varname}" is not defined.`);
-          return;
-        }
-      } else {
-        // If the value is neither boolean, neither string, neither variable, attempt to convert it into number
-        left = parseFloat(left);
-
-        if (isNaN(left)) {
-          throw new Error(`Failed to determine the data type of the condition value. Note that variable names should be wrapped in duble curly braces {{}} and string values in single '' or double "" quotes.`);
-          return;
-        }
-      }
-    }
+    left = searchObjectByString(varname, data);
+  } else {
+    // 5. Otherwise attempt to convert it to other primitive types
+    left = stringToPrimitive(left);
   }
 
   // 6. Perform same operations to the right side, if condition string contained a comparison operator
   if (operator) {
-    if (right === 'true') right = true;
-    if (right === 'false') right = false;
+    if (right.startsWith('{{') && right.endsWith('}}')) {
+      const varname = right.slice(2, -2).trim();
 
-    if (typeof right == 'string') {
-      if (right.startsWith("'") && right.endsWith("'") ||
-        right.startsWith('"') && right.endsWith('"')) {
-        right = right.slice(1,-1);
-      } else {
-        if (typeof right == 'string' && right.startsWith('{{') && right.endsWith('}}')) {
-          const varname = right.slice(2, -2).trim();
-
-          right = data[varname];
-
-          if (right === undefined) {
-            throw new Error(`Cannot evaluate condition. Variable "${varname}" is not defined.`);
-            return;
-          }
-        } else {
-          right = parseFloat(right);
-        }
-      }
+      right = searchObjectByString(varname, data);
+    } else {
+      right = stringToPrimitive(right);
     }
   }
 

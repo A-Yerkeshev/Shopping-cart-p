@@ -163,8 +163,8 @@ nav a {
 }
 
 .form form {
-  width: 80%;
-  margin: auto;
+  width: 65%;
+  margin: 1rem auto;
   font-size: 1.2rem;
   display: flex;
   flex-direction: column;

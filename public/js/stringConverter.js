@@ -6,11 +6,15 @@
 //
 // const person = {
 //   name: "Toto",
-//   age: 93
+//   char: {
+//     height: 179,
+//     weight: 76
+//   }
 // }
 //
-// searchObjectByString('person.name', person) ----> "Toto"
-// searchObjectByString('person["age"]') ----> 93
+// searchObjectByString('name', person) ----> "Toto"
+// searchObjectByString('char.height', person) ----> 179
+// searchObjectByString('char["weight"]') ----> 76
 //
 // Example 2:
 //
@@ -21,6 +25,18 @@
 //
 // searchObjectByString('letters[0]', data) ----> 'a'
 // searchObjectByString('lettersArray[1]', data) ----> 'b'
+//
+// Example 3:
+//
+// const data = {
+//   sum(a, b) {
+//     return a + b;
+//   },
+//   a: 10
+// }
+//
+// searchObjectByString('sum(1, 2)', data) ----> 3
+// searchObjectByString('sum(1, {{ a }})', data) ----> 11
 
 function searchObjectByString(varname, data) {
   if (typeof varname !== 'string') {
@@ -48,40 +64,8 @@ function searchObjectByString(varname, data) {
       return;
     }
 
-    // 1.3 Determine whether right part is meant to be property or method name
-    if (right.endsWith(')')) {
-
-
-
-
-      // Method name
-      // 1.4 Separate method name from parentheses
-      // const firstP = right.indexOf('(');
-
-      // if (firstP == -1) {
-      //   throw new Error(`Missing opening parenthesis`)
-      // }
-
-      // const methodName = right.substring(0, )
-
-
-      // if ((right in obj) == false) {
-      //   throw new Error(`Mehtod "${right}" does not exist on "${left}" object.`);
-      //   return;
-      // }
-
-
-
-
-    } else {
-      // Property name
-      // 1.4 Get the value of the property
-      if ((right in obj) == false) {
-        throw new Error(`Property "${right}" does not exist on "${left}" object.`);
-        return;
-      }
-      return obj[right];
-    }
+    // 1.3 Because obj is object, we can call function recursively, passing obj as data object
+    return searchObjectByString(right, obj);
   }
 
   // 2. Check if variable string contains "[]". In this case, treat variable as array, object or string
@@ -180,16 +164,18 @@ function searchObjectByString(varname, data) {
 
         return searchObjectByString(arg, data);
       } else {
-
         // 3.3.2 Otherwise, attempt to convert argument to other primitives
         return stringToPrimitive(arg);
       }
     })
+
+    // 3.4 Call method with arguments
+    return method.apply(null, args);
   }
 
   // 4. If variable string does not contain ".", "[]" or "()", lookup varname in data object
   if ((varname in data) == false) {
-    throw new Error(`Property "${varname}" does not exist on data object.`);
+    throw new Error(`"${varname}" is not defined.`);
     return;
   }
 
