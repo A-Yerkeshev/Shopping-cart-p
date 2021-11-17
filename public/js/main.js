@@ -79,8 +79,14 @@ function addToCart(ev) {
     }
 
     if (match) {
-      // If it is, increase the quantity
-      match.quantity++;
+      // If it is, check what triggered addToCart function
+      if (ev.target.value) {
+        // If it was triggered by input field - set new quantity
+        match.quantity = ev.target.value;
+      } else {
+        // If it was triggered by button - increase quantity by 1
+        match.quantity++;
+      }
     } else {
       // Otherwise add new entry to cart
       cart.push({
@@ -144,9 +150,14 @@ function addStoreEventListeners() {
 
 function addCartEventListeners() {
   const buttons = Array.from(document.getElementsByClassName('remove'));
+  const inputs = Array.from(document.getElementsByClassName('quantity'));
 
   buttons.forEach((button) => {
     button.addEventListener('click', removeFromCart);
+  })
+
+  inputs.forEach((input) => {
+    input.addEventListener('change', addToCart);
   })
 }
 
