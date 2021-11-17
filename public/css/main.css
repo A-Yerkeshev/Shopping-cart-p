@@ -4,6 +4,7 @@
   --yellow-shade: #999900;
   --black: #403530;
   --white: #f9f7f7;
+  --error-bg: #ed5f5f;
   --orbitron: orbitron, 'Courier New', monospace;
 }
 
@@ -85,7 +86,7 @@ nav a {
   margin: 0 1rem;
 }
 
-/*** STORE ******************************************/
+/*** STORE ********************************************************/
 
 .item {
   width: 70%;
@@ -128,7 +129,19 @@ nav a {
   cursor: pointer;
 }
 
-/*** SINGING PAGES *****************************************/
+/*** SIGNING PAGES ************************************************/
+.error {
+  background-color: var(--error-bg);
+  display: none;
+  margin: 1rem 18% 0;
+  padding: 0.2rem 0.4rem;
+  color: white;
+}
+
+.error.active {
+  display: inline-block;
+}
+
 .form h2 {
   font-size: 1.8rem;
   text-align: center;
@@ -186,7 +199,7 @@ nav a {
   box-shadow: 0 1px 4px var(--yellow-shade);
 }
 
-/*** CART *********************************************/
+/*** CART ***********************************************************/
 #cart {
   position: absolute;
   top: 0;

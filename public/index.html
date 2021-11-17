@@ -27,7 +27,7 @@
     </main>
   </div>
 
-  <section id="cart" class="onscreen">
+  <section id="cart" class="">
   </section>
   <script type="module" src="js/main.js"></script>
 </body>
@@ -41,6 +41,7 @@
 <template id="sign-up-template">
   <div class="form">
     <h2>Sign Up</h2>
+    <span class="error"></span>
     <form>
       <label for="username">Name:</label>
       <input type="text" name="username" maxlength="50" required>
@@ -56,6 +57,7 @@
 <template id="sign-in-template">
   <div class="form">
     <h2>Sign In</h2>
+    <span class="error"></span>
     <form>
       <label for="username">Name:</label>
       <input type="text" name="username" maxlength="50" required>
