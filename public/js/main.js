@@ -6,11 +6,10 @@ import { getCookie, setCookie } from './cookies.js'
 const log = console.log;
 
 const store = document.getElementById('store-template');
-const signUp = document.getElementById('sign-up-template');
-const signIn = document.getElementById('sign-in-template');
+const signUpTpl = document.getElementById('sign-up-template');
+const signInTpl = document.getElementById('sign-in-template');
 const cartTpl = document.getElementById('cart-template');
 const cartView = document.getElementById('cart');
-const cartToggle = document.querySelector('.cart-toggle');
 
 // Number of days after cart cookie will expire
 const expDays = 5;
@@ -22,11 +21,11 @@ Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
 Router.when('/store', fillStoreTemplate);
 Router.onload('/store', addStoreEventListeners);
-Router.when('/sign-up', signUp.content);
-Router.when('/sign-in', signIn.content);
+Router.when('/sign-up', signUpTpl.content);
+Router.onload('/sign-up', addSignUpEventListeners);
+Router.when('/sign-in', signInTpl.content);
+Router.onload('/sign-in', addSignInEventListeners);
 Router.default('/');
-
-cartToggle.addEventListener('click', toggleCart);
 
 function updateCart() {
   const cart = getCookie('cart');
@@ -151,6 +150,9 @@ function addStoreEventListeners() {
 function addCartEventListeners() {
   const buttons = Array.from(document.getElementsByClassName('remove'));
   const inputs = Array.from(document.getElementsByClassName('quantity'));
+  const cartToggle = document.querySelector('.cart-toggle');
+
+  cartToggle.addEventListener('click', toggleCart);
 
   buttons.forEach((button) => {
     button.addEventListener('click', removeFromCart);
@@ -159,6 +161,18 @@ function addCartEventListeners() {
   inputs.forEach((input) => {
     input.addEventListener('change', addToCart);
   })
+}
+
+function addSignUpEventListeners() {
+  const form = document.querySelector('.form form');
+
+  form.addEventListener('submit', signUp);
+}
+
+function addSignInEventListeners() {
+  const form = document.querySelector('.form form');
+
+  form.addEventListener('submit', signIn);
 }
 
 function fetchItems() {
@@ -170,4 +184,26 @@ function fetchItems() {
       return data;
     })
     .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
+}
+
+function signUp(ev) {
+  ev.preventDefault();
+
+  const error = document.querySelector('.error');
+  const data = new FormData(ev.target);
+  const username = data.get('username');
+  const password = data.get('password');
+  const passwordRep = data.get('password-rep');
+
+  // 1. Clean error field
+  error.textContent = '';
+  error.classList.remove('active');
+
+  // 2. Validate input
+  if (password !== passwordRep) {
+    error.textContent = 'Passwords do not match!';
+    error.classList.add('active');
+
+    return;
+  }
 }
