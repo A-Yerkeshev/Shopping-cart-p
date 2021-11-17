@@ -1,6 +1,7 @@
 const express = require("express");
 const { Client } = require("pg");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 const log = console.log;
 let client;
 
@@ -66,7 +67,7 @@ app.get('/products', (request, response) => {
 })
 
 // Register new user
-app.post('/users', (request, response) => {
+app.post('/users', async (request, response) => {
   // 1. Validate request object
   const username = request.body.username.trim();
   const password = request.body.password.trim();
@@ -107,6 +108,9 @@ app.post('/users', (request, response) => {
   }
 
   // 2. Hash password
+  const hash = await bcrypt.hash(password, 10);
+  log('Hashed   ', hash)
+
   // 3. Add new user to database
 
   response.status(201).send(`User "${username}" successfully registered`);
