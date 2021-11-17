@@ -201,10 +201,10 @@ nav a {
 
 /*** CART ***********************************************************/
 #cart {
-  position: absolute;
+  position: fixed;
   top: 0;
-  bottom: 0;
   width: 100vw;
+  height: 100vh;
   background-color: var(--yellow);
   transform: translateX(100vw);
   transition: transform 0.8s;
