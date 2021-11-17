@@ -75,12 +75,12 @@ app.post('/users', (request, response) => {
 
   // 1.1 Check if value is present
   if (!username) {
-    response.status(400).send(`Username is not valid.`);
+    response.status(400).send(`Username is empty or invalid.`);
     return;
   }
 
   if (!password) {
-    response.status(400).send(`Password is not valid.`);
+    response.status(400).send(`Password is empty or invalid.`);
     return;
   }
 
@@ -110,6 +110,54 @@ app.post('/users', (request, response) => {
   // 3. Add new user to database
 
   response.status(201).send(`User "${username}" successfully registered`);
+})
+
+// Sign user in
+app.post('/users/auth', (request, response) => {
+  // 1. Validate request object
+  const username = request.body.username.trim();
+  const password = request.body.password.trim();
+  const userRegEx = /[A-Za-z0-9_]+$/;
+  const passRegEx = /[A-Za-z0-9_\-@\$\*#\+]+$/;
+
+  // 1.1 Check if value is present
+  if (!username) {
+    response.status(400).send(`Username is empty or invalid.`);
+    return;
+  }
+
+  if (!password) {
+    response.status(400).send(`Password is empty or invalid.`);
+    return;
+  }
+
+  // 1.2 Check that it has correct type
+  if (typeof username !== 'string') {
+    response.status(400).send(`Username is not a string.`);
+    return;
+  }
+
+  if (typeof password !== 'string') {
+    response.status(400).send(`Password is not a string.`);
+    return;
+  }
+
+  // 1.3 Check that it does not contain invalid characters
+  if (username.search(userRegEx) == -1) {
+    response.status(400).send(`Username contains invalid characters. Only A-Z, a-z, 0-9 and _ are allowed.`);
+    return;
+  }
+
+  if (password.search(passRegEx) == -1) {
+    response.status(400).send(`Password contains invalid characters. Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.`);
+    return;
+  }
+
+  // 2. Try to find user
+  // 3. If user is found - compare passwords
+  // 4. If everything is ok - log user in
+
+  response.status(200).send(`User successfully loged in.`);
 })
 
 app.listen(process.env.PORT || 3000);

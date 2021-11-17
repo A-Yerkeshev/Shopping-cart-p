@@ -169,7 +169,6 @@ function addSignUpEventListeners() {
 
   form.addEventListener('submit', signUp);
 
-
   // 1. Change default pattern mismatch message for input fields
   const userInput = form.querySelector('#username');
 
@@ -226,7 +225,6 @@ function fetchItems() {
 function signUp(ev) {
   ev.preventDefault();
 
-  const error = document.querySelector('.error');
   const formData = new FormData(ev.target);
   const username = formData.get('username').trim();
   const password = formData.get('password').trim();
@@ -263,6 +261,31 @@ function signUp(ev) {
     })
 }
 
-function signIn() {
+function signIn(ev) {
+  ev.preventDefault();
 
+  const formData = new FormData(ev.target);
+  const username = formData.get('username').trim();
+  const password = formData.get('password').trim();
+
+  const data = {
+    username,
+    password
+  }
+
+  const request = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }
+
+  fetch('/users/auth', request)
+    .then((response) => {
+      if (response.ok) log(`User successfully signed in.`);
+    })
+    .catch((error) => {
+      throw new Error(error);
+    })
 }
