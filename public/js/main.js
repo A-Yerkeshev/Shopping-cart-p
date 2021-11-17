@@ -245,19 +245,21 @@ function signUp(ev) {
     password
   }
 
-  const request = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(newUser)
-  }
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/json');
 
-  fetch('/users', request)
+  const request = new Request('/users', {
+    method: 'POST',
+    headers,
+    mode: 'same-origin',
+    body: JSON.stringify(newUser)
+  })
+
+  fetch(request)
     .then((response) => {
       if (response.ok) log(`New user "${username}" successfully registered.`);
     }).catch((error) => {
-      throw new Error(error);
+      throw new Error(error.message);
     })
 }
 
@@ -273,19 +275,21 @@ function signIn(ev) {
     password
   }
 
-  const request = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  }
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/json');
 
-  fetch('/users/auth', request)
+  const request = new Request('/users/auth', {
+    method: 'POST',
+    headers,
+    mode: 'same-origin',
+    body: JSON.stringify(data)
+  })
+
+  fetch(request)
     .then((response) => {
       if (response.ok) log(`User successfully signed in.`);
     })
     .catch((error) => {
-      throw new Error(error);
+      throw new Error(error.message);
     })
 }
