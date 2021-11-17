@@ -227,16 +227,12 @@ function signUp(ev) {
   ev.preventDefault();
 
   const error = document.querySelector('.error');
-  const data = new FormData(ev.target);
-  const username = data.get('username');
-  const password = data.get('password');
-  const passwordRep = data.get('password-rep');
+  const formData = new FormData(ev.target);
+  const username = formData.get('username').trim();
+  const password = formData.get('password').trim();
+  const passwordRep = formData.get('password-rep');
 
-  // 1. Clean error field
-  // error.textContent = '';
-  // error.classList.remove('active');
-
-  // 1.2 Validate passwords match
+  // 1. Validate passwords match
   const passInput = ev.target.querySelector('#password');
 
   if (password !== passwordRep) {
@@ -245,4 +241,24 @@ function signUp(ev) {
     return;
   }
 
+  // 2. Send registration request to the server
+  const newUser = {
+    username,
+    password
+  }
+
+  const request = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(newUser)
+  }
+
+  fetch('/users', request)
+    .then((response) => {
+      log('Status', response.status)
+    }).catch((error) => {
+      throw new Error(error);
+    })
 }

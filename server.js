@@ -1,5 +1,7 @@
 const express = require("express");
 const { Client } = require("pg");
+const bodyParser = require("body-parser");
+const log = console.log;
 let client;
 
 const app = express();
@@ -49,14 +51,38 @@ client.connect((error) => {
   }
 })
 
+// Setup middleware
 app.use('/', express.static('public'));
-app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-free/'))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-free/'));
 
+// Get products data from database and send it
 app.get('/products', (request, response) => {
   client.query('SELECT * from products', (error, data) => {
     if (error) {console.log('Database query error: ', error.stack)};
     response.status(200).send(data.rows);
   })
+})
+
+// Register new user
+app.post('/users', (request, response) => {
+  log('Request body', request.body)
+  // 1. Validate request object
+  const username = request.body.username.trim();
+  const password = request.body.password.trim();
+
+  if (!username) {
+    response.status(400).send(`Username is not valid.`);
+    return;
+  }
+
+  if (!password) {
+    response.status(400).send(`Password is not valid.`);
+    return;
+  }
+
+  response.status(201).send(`User "${username}" successfully registered`);
 })
 
 app.listen(process.env.PORT || 3000);

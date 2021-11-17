@@ -163,18 +163,6 @@ nav a {
   transform: skew(-20deg);
 }
 
-.error {
-  background-color: var(--error-bg);
-  display: none;
-  margin: 1rem 18% 0;
-  padding: 0.2rem 0.4rem;
-  color: white;
-}
-
-.error.active {
-  display: inline-block;
-}
-
 .form form {
   width: 65%;
   margin: 1rem auto;
