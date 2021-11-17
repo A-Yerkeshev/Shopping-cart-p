@@ -130,18 +130,6 @@ nav a {
 }
 
 /*** SIGNING PAGES ************************************************/
-.error {
-  background-color: var(--error-bg);
-  display: none;
-  margin: 1rem 18% 0;
-  padding: 0.2rem 0.4rem;
-  color: white;
-}
-
-.error.active {
-  display: inline-block;
-}
-
 .form h2 {
   font-size: 1.8rem;
   text-align: center;
@@ -173,6 +161,18 @@ nav a {
     var(--white) 94%, var(--white) 97%,
     var(--yellow) 97%, var(--yellow));
   transform: skew(-20deg);
+}
+
+.error {
+  background-color: var(--error-bg);
+  display: none;
+  margin: 1rem 18% 0;
+  padding: 0.2rem 0.4rem;
+  color: white;
+}
+
+.error.active {
+  display: inline-block;
 }
 
 .form form {

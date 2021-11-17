@@ -165,14 +165,51 @@ function addCartEventListeners() {
 
 function addSignUpEventListeners() {
   const form = document.querySelector('.form form');
+  const inputs = [];
 
   form.addEventListener('submit', signUp);
+
+
+  // 1. Change default pattern mismatch message for input fields
+  const userInput = form.querySelector('#username');
+
+  if (userInput) inputs.push(userInput);
+
+  userInput.addEventListener('invalid', () => {
+    patternMismatchMessage(userInput, 'Only A-Z, a-z, 0-9 and _ are allowed.');
+  })
+
+
+  const passInput = form.querySelector('#password');
+
+  if (passInput) inputs.push(passInput);
+
+  passInput.addEventListener('invalid', () => {
+    patternMismatchMessage(passInput, 'Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.');
+  })
+
+
+  const passRepInput = form.querySelector('#password-rep');
+  if (passRepInput) inputs.push(passRepInput);
+
+  // 2. Clear validation messages on input value change
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      input.setCustomValidity('');
+    })
+  })
 }
 
 function addSignInEventListeners() {
   const form = document.querySelector('.form form');
 
   form.addEventListener('submit', signIn);
+}
+
+function patternMismatchMessage(input, message) {
+  if (input.validity.patternMismatch) {
+    input.setCustomValidity(message);
+  }
 }
 
 function fetchItems() {
@@ -196,14 +233,16 @@ function signUp(ev) {
   const passwordRep = data.get('password-rep');
 
   // 1. Clean error field
-  error.textContent = '';
-  error.classList.remove('active');
+  // error.textContent = '';
+  // error.classList.remove('active');
 
-  // 2. Validate input
+  // 1.2 Validate passwords match
+  const passInput = ev.target.querySelector('#password');
+
   if (password !== passwordRep) {
-    error.textContent = 'Passwords do not match!';
-    error.classList.add('active');
-
+    passInput.setCustomValidity('Passwords do not match.');
+    passInput.reportValidity();
     return;
   }
+
 }

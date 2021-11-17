@@ -44,11 +44,11 @@
     <span class="error"></span>
     <form>
       <label for="username">Name:</label>
-      <input type="text" name="username" maxlength="50" required>
+      <input type="text" name="username" id="username" pattern="[A-Za-z0-9_]+$" maxlength="50" required>
       <label for="password">Password:</label>
-      <input type="password" name="password" minlength="8" maxlength="50" required>
+      <input type="password" name="password" id="password" pattern="[A-Za-z0-9_\-@\$\*#\+]+$" minlength="8" maxlength="50" required>
       <label for="password-rep">Repeat password:</label>
-      <input type="password" name="password-rep" minlength="8" maxlength="50" required>
+      <input type="password" name="password-rep" id="password-rep" pattern="[A-Za-z0-9_\-@\$\*#\+]+$" minlength="8" maxlength="50" required>
       <input type="submit" value="Sign Up">
     </form>
   </div>
