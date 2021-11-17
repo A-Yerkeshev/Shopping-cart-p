@@ -257,8 +257,12 @@ function signUp(ev) {
 
   fetch('/users', request)
     .then((response) => {
-      log('Status', response.status)
+      if (response.ok) log(`New user "${username}" successfully registered.`);
     }).catch((error) => {
       throw new Error(error);
     })
+}
+
+function signIn() {
+
 }

@@ -67,11 +67,13 @@ app.get('/products', (request, response) => {
 
 // Register new user
 app.post('/users', (request, response) => {
-  log('Request body', request.body)
   // 1. Validate request object
   const username = request.body.username.trim();
   const password = request.body.password.trim();
+  const userRegEx = /[A-Za-z0-9_]+$/;
+  const passRegEx = /[A-Za-z0-9_\-@\$\*#\+]+$/;
 
+  // 1.1 Check if value is present
   if (!username) {
     response.status(400).send(`Username is not valid.`);
     return;
@@ -81,6 +83,31 @@ app.post('/users', (request, response) => {
     response.status(400).send(`Password is not valid.`);
     return;
   }
+
+  // 1.2 Check that it has correct type
+  if (typeof username !== 'string') {
+    response.status(400).send(`Username is not a string.`);
+    return;
+  }
+
+  if (typeof password !== 'string') {
+    response.status(400).send(`Password is not a string.`);
+    return;
+  }
+
+  // 1.3 Check that it does not contain invalid characters
+  if (username.search(userRegEx) == -1) {
+    response.status(400).send(`Username contains invalid characters. Only A-Z, a-z, 0-9 and _ are allowed.`);
+    return;
+  }
+
+  if (password.search(passRegEx) == -1) {
+    response.status(400).send(`Password contains invalid characters. Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.`);
+    return;
+  }
+
+  // 2. Hash password
+  // 3. Add new user to database
 
   response.status(201).send(`User "${username}" successfully registered`);
 })
