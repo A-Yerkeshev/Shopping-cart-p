@@ -187,7 +187,7 @@ app.post('/users/auth', (request, response) => {
 
       response.status(200).send(`User successfully loged in.`);
     } else {
-      response.status(406).send('Password is not correct');
+      response.status(406).send('Password is not correct.');
     }
   } else {
     response.status(406).send(`User with name "${username}" not found.`);

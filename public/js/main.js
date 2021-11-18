@@ -268,10 +268,12 @@ function signUp(ev) {
         }
 
         return response.text().then((message) => {
-          throw Error(message)
+          throw new Error(message);
         })
       }
-    }).catch((error) => log(error))
+    }).catch((error) => {
+      throw new Error(error);
+    })
 }
 
 function signIn(ev) {
@@ -298,9 +300,25 @@ function signIn(ev) {
 
   fetch(request)
     .then((response) => {
-      if (response.ok) log(`User successfully signed in.`);
-    })
-    .catch((error) => {
+      if (response.ok) {
+        log(`User successfully signed in.`)
+      } else {
+        return response.text().then((message) => {
+          throw new Error(message);
+        })
+      }
+    }).catch((error) => {
+      const userInput = document.getElementById('username');
+      const passInput = document.getElementById('password');
+
+      if (error.message == 'Password is not correct.') {
+        passInput.setCustomValidity(error.message);
+        passInput.reportValidity();
+      } else {
+        userInput.setCustomValidity(error.message);
+        userInput.reportValidity();
+      }
+
       throw new Error(error.message);
     })
 }
