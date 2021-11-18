@@ -201,8 +201,15 @@ function addSignUpEventListeners() {
 
 function addSignInEventListeners() {
   const form = document.querySelector('.form form');
+  const inputs = form.querySelectorAll('input');
 
   form.addEventListener('submit', signIn);
+
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      input.setCustomValidity('');
+    })
+  })
 }
 
 function patternMismatchMessage(input, message) {
@@ -219,7 +226,7 @@ function fetchItems() {
       updateCart();
       return data;
     })
-    .catch((error) => {throw new Error('Error fetching data from /products: ' + error)});
+    .catch((error) => log('Error fetching data from /products: ' + error));
 }
 
 function signUp(ev) {
@@ -260,7 +267,7 @@ function signUp(ev) {
       if (response.ok) {
         log(`New user "${username}" successfully registered.`);
       } else {
-        if (response.status == 406) {
+        if (response.status == 409) {
           const userInput = document.getElementById('username');
 
           userInput.setCustomValidity('Username is not available. Please, choose another name.');
@@ -271,9 +278,7 @@ function signUp(ev) {
           throw new Error(message);
         })
       }
-    }).catch((error) => {
-      throw new Error(error);
-    })
+    }).catch((error) => log('Error registering new user: ', error.message))
 }
 
 function signIn(ev) {
@@ -301,7 +306,7 @@ function signIn(ev) {
   fetch(request)
     .then((response) => {
       if (response.ok) {
-        log(`User successfully signed in.`)
+        log(`User successfully signed in.`);
       } else {
         return response.text().then((message) => {
           throw new Error(message);
@@ -319,6 +324,6 @@ function signIn(ev) {
         userInput.reportValidity();
       }
 
-      throw new Error(error.message);
+      log('Error signing user in: ', error.message);
     })
 }

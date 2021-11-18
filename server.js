@@ -112,7 +112,7 @@ app.post('/users', async (request, response) => {
   }
 
   // 2. Check that username is available
-  if (await getUser(username)) {
+  if (await getUser(username) === null) {
     // 3. Hash password
     const hash = await bcrypt.hash(password, 13);
 
@@ -129,12 +129,12 @@ app.post('/users', async (request, response) => {
       }
     })
   } else {
-    response.status(406).send(`User with username "${username}" already registered.`);
+    response.status(409).send(`User with username "${username}" already registered.`);
   }
 })
 
 // Sign user in
-app.post('/users/auth', (request, response) => {
+app.post('/users/auth', async (request, response) => {
   // 1. Validate request object
   const username = request.body.username.trim();
   const password = request.body.password.trim();
@@ -163,23 +163,12 @@ app.post('/users/auth', (request, response) => {
     return;
   }
 
-  // 1.3 Check that it does not contain invalid characters
-  if (username.search(userRegEx) == -1) {
-    response.status(400).send(`Username contains invalid characters. Only A-Z, a-z, 0-9 and _ are allowed.`);
-    return;
-  }
-
-  if (password.search(passRegEx) == -1) {
-    response.status(400).send(`Password contains invalid characters. Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.`);
-    return;
-  }
-
   // 2. Try to find user
-  const user = getUser(username);
+  const user = await getUser(username);
 
   // 3. If user is found - compare passwords
   if (user) {
-    const correctPass = comparePasswords(password, user.password);
+    const correctPass = await comparePasswords(password, user.password);
 
     if (correctPass) {
       // 4. If everything is ok - log user in
@@ -187,10 +176,10 @@ app.post('/users/auth', (request, response) => {
 
       response.status(200).send(`User successfully loged in.`);
     } else {
-      response.status(406).send('Password is not correct.');
+      response.status(401).send('Password is not correct.');
     }
   } else {
-    response.status(406).send(`User with name "${username}" not found.`);
+    response.status(401).send(`User with name "${username}" is not found.`);
   }
 })
 
@@ -214,25 +203,28 @@ function getUser(username) {
       if (error) {
         log('Database query error: ', error.stack);
         response.status(500).send('Error occured when attempting to register new user.');
-        resolve();
+        resolve(null);
       } else {
-        if (data.rows.length > 0) {
-          resolve();
+        if (data.rows.length === 0) {
+          resolve(null);
+        } else {
+          resolve(data.rows[0]);
         }
       }
-      resolve(data.rows);
     })
   })
 }
 
 function comparePasswords(password, hash) {
-  bcrypt.compare(password, hash, (error, result) => {
-    if (error) {
-      log('Error occured when comparing passwords.');
-      return;
-    }
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, hash, (error, result) => {
+      if (error) {
+        log('Error occured when comparing passwords.', error);
+        reject();
+      }
 
-    return result;
+      resolve(result);
+    })
   })
 }
 
