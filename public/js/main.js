@@ -257,10 +257,21 @@ function signUp(ev) {
 
   fetch(request)
     .then((response) => {
-      if (response.ok) log(`New user "${username}" successfully registered.`);
-    }).catch((error) => {
-      throw new Error(error.message);
-    })
+      if (response.ok) {
+        log(`New user "${username}" successfully registered.`);
+      } else {
+        if (response.status == 406) {
+          const userInput = document.getElementById('username');
+
+          userInput.setCustomValidity('Username is not available. Please, choose another name.');
+          userInput.reportValidity();
+        }
+
+        return response.text().then((message) => {
+          throw Error(message)
+        })
+      }
+    }).catch((error) => log(error))
 }
 
 function signIn(ev) {

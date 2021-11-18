@@ -47,8 +47,8 @@ const skey = process.env.STRIPE_SKEY;
 const pkey = process.env.STRIPE_PKEY;
 
 client.connect((error) => {
-  if (error) {console.log('Database connection error: ', error.stack)} else {
-    console.log('Connection to database established');
+  if (error) {log('Database connection error: ', error.stack)} else {
+    log('Connection to database established');
   }
 })
 
@@ -61,8 +61,12 @@ app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-fr
 // Get products data from database and send it
 app.get('/products', (request, response) => {
   client.query('SELECT * from products', (error, data) => {
-    if (error) {console.log('Database query error: ', error.stack)};
-    response.status(200).send(data.rows);
+    if (error) {
+      log('Database query error: ', error.stack);
+      response.status(500).send('Error occured when attempting to get products data.');
+    } else {
+      response.status(200).send(data.rows);
+    }
   })
 })
 
@@ -107,13 +111,26 @@ app.post('/users', async (request, response) => {
     return;
   }
 
-  // 2. Hash password
-  const hash = await bcrypt.hash(password, 10);
-  log('Hashed   ', hash)
+  // 2. Check that username is available
+  if (await getUser(username)) {
+    // 3. Hash password
+    const hash = await bcrypt.hash(password, 13);
 
-  // 3. Add new user to database
+    // 4. Add new user to database
+    query = `INSERT INTO users(username, password) VALUES ('${username}', '${hash}')`;
 
-  response.status(201).send(`User "${username}" successfully registered`);
+    client.query(query, (error, data) => {
+      if (error) {
+        log('Database query error: ', error.stack);
+        response.status(500).send('Error occured when attempting to register new user.');
+      } else {
+        log(`User "${username}" successfully registered.`);
+        response.status(201).send(`User "${username}" successfully registered.`);
+      }
+    })
+  } else {
+    response.status(406).send(`User with username "${username}" already registered.`);
+  }
 })
 
 // Sign user in
@@ -158,11 +175,66 @@ app.post('/users/auth', (request, response) => {
   }
 
   // 2. Try to find user
-  // 3. If user is found - compare passwords
-  // 4. If everything is ok - log user in
+  const user = getUser(username);
 
-  response.status(200).send(`User successfully loged in.`);
+  // 3. If user is found - compare passwords
+  if (user) {
+    const correctPass = comparePasswords(password, user.password);
+
+    if (correctPass) {
+      // 4. If everything is ok - log user in
+
+
+      response.status(200).send(`User successfully loged in.`);
+    } else {
+      response.status(406).send('Password is not correct');
+    }
+  } else {
+    response.status(406).send(`User with name "${username}" not found.`);
+  }
 })
+
+// Temporary route to get all users from database
+app.get('/users', (request, response) => {
+  client.query('SELECT * from users', (error, data) => {
+    if (error) {
+      log('Database query error: ', error.stack);
+      response.status(500).send('Error occured when attempting to get users.');
+    } else {
+      response.status(200).send(data.rows);
+    }
+  })
+})
+
+function getUser(username) {
+  return new Promise((resolve) => {
+    let query = `SELECT username, password FROM users WHERE username = '${username}'`;
+
+    client.query(query, (error, data) => {
+      if (error) {
+        log('Database query error: ', error.stack);
+        response.status(500).send('Error occured when attempting to register new user.');
+        resolve();
+      } else {
+        if (data.rows.length > 0) {
+          resolve();
+        }
+      }
+      resolve(data.rows);
+    })
+  })
+}
+
+function comparePasswords(password, hash) {
+  bcrypt.compare(password, hash, (error, result) => {
+    if (error) {
+      log('Error occured when comparing passwords.');
+      return;
+    }
+
+    return result;
+  })
+}
 
 app.listen(process.env.PORT || 3000);
 
