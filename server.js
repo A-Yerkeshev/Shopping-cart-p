@@ -178,7 +178,7 @@ app.post('/users/auth', async (request, response) => {
       const payload = {
         id: user.id,
         username: user.username,
-        expires: Math.floor(Date.now()/1000) + 60*60*12
+        exp: Math.floor(Date.now()/1000) + 60*60*12
       }
 
       const token = jwt.sign(payload, jwtkey);

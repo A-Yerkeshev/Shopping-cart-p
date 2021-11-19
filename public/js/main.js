@@ -278,6 +278,17 @@ function signUp(ev) {
           throw new Error(message);
         })
       }
+    }).then(() => {
+      // Sign newly registered user in
+      const request = new Request('/users/auth', {
+        method: 'POST',
+        headers,
+        mode: 'same-origin',
+        body: JSON.stringify(newUser)
+      })
+
+      sendSignInRequest(request, username)
+        .catch((error) => log('Error signing user in: ', error.message))
     }).catch((error) => log('Error registering new user: ', error.message))
 }
 
@@ -303,34 +314,8 @@ function signIn(ev) {
     body: JSON.stringify(data)
   })
 
-  fetch(request)
-    .then((response) => {
-      if (response.ok) {
-        log(`User successfully signed in.`);
-        return response.text();
-      } else {
-        return response.text().then((message) => {
-          throw new Error(message);
-        })
-      }
-    }).then((token) => {
-      // 1. Verify that token is a string
-      if (typeof token !== 'string') {
-        throw new Error('Token came from server is not of "string" type.');
-        return;
-      }
-
-      // 2. Save token in local storage
-      localStorage.setItem('token', token);
-
-      // 3. Redirect to homepage
-      location.href = '/#';
-
-      // 4. Give visual indication of successful authentication
-      const userbox = document.getElementById('userbox');
-      userbox.textContent = `Signed as ${username}`;
-
-    }).catch((error) => {
+  sendSignInRequest(request, username)
+    .catch((error) => {
       const userInput = document.getElementById('username');
       const passInput = document.getElementById('password');
 
@@ -344,4 +329,41 @@ function signIn(ev) {
 
       log('Error signing user in: ', error.message);
     })
+}
+
+function sendSignInRequest(request, username) {
+  return new Promise((resolve, reject) => {
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        } else {
+          return response.text().then((message) => {
+            throw new Error(message);
+          })
+        }
+      }).then((token) => {
+        log(`User successfully signed in.`);
+
+        // 1. Verify that token is a string
+        if (typeof token !== 'string') {
+          throw new Error('Token came from server is not of "string" type.');
+          return;
+        }
+
+        // 2. Save token in local storage
+        localStorage.setItem('token', token);
+
+        // 3. Redirect to homepage
+        location.href = '/#';
+
+        // 4. Give visual indication of successful authentication
+        const userbox = document.getElementById('userbox');
+        userbox.textContent = `Signed as ${username}`;
+
+        resolve();
+      }).catch((error) => {
+        reject(error);
+      })
+  })
 }
