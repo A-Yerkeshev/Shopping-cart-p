@@ -2,6 +2,7 @@ const express = require("express");
 const { Client } = require("pg");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const log = console.log;
 let client;
 
