@@ -124,7 +124,7 @@ app.post('/users', async (request, response) => {
     client.query(query, (error, data) => {
       if (error) {
         log('Database query error: ', error.stack);
-        response.status(500).send('Error occured when attempting to register new user.');
+        response.status(500).send('Error occured when attempting to add new user to database.');
       } else {
         log(`User "${username}" successfully registered.`);
         response.status(201).send(`User "${username}" successfully registered.`);
@@ -192,6 +192,28 @@ app.post('/users/auth', async (request, response) => {
   }
 })
 
+// Send username when receiving valid token
+app.get('/users/auth/token', async (request, response) => {
+  const token = request.query.token;
+
+  try {
+    // 1. Extract username and id from token
+    const payload = jwt.verify(token, jwtkey);
+
+    // 2. Check if user exists and has correct id
+    if (payload && payload.username && payload.id) {
+      const user = await getUser(payload.username);
+
+      if (user && user.id == payload.id) {
+        // 3. Send username to the client
+        response.status(200).send(payload.username);
+      } else throw new Error('User is not found.');
+    } else throw new Error('Token is not valid.');
+  } catch(error) {
+    response.status(401).send(error.message);
+  }
+})
+
 // Temporary route to get all users from database
 app.get('/users', (request, response) => {
   client.query('SELECT * from users', (error, data) => {
@@ -206,12 +228,12 @@ app.get('/users', (request, response) => {
 
 function getUser(username) {
   return new Promise((resolve) => {
-    let query = `SELECT username, password FROM users WHERE username = '${username}'`;
+    const query = `SELECT id, username, password FROM users WHERE username = '${username}'`;
 
     client.query(query, (error, data) => {
       if (error) {
         log('Database query error: ', error.stack);
-        response.status(500).send('Error occured when attempting to register new user.');
+        response.status(500).send('Error occured when attempting to get user from database.');
         resolve(null);
       } else {
         if (data.rows.length === 0) {

@@ -28,6 +28,9 @@ Router.when('/sign-in', signInTpl.content);
 Router.onload('/sign-in', addSignInEventListeners);
 Router.default('/');
 
+// Try to sign user in if valid token is present in local storage
+signInByToken();
+
 function updateCart() {
   const cart = getCookie('cart');
   const items = [];
@@ -361,8 +364,7 @@ function sendSignInRequest(request, username) {
         location.href = '/#';
 
         // 4. Give visual indication of successful authentication
-        const userbox = document.getElementById('userbox');
-        userbox.textContent = `Signed as ${username}`;
+        fillUserBox(username);
 
         // 5. Display cart
         displayCart();
@@ -372,4 +374,45 @@ function sendSignInRequest(request, username) {
         reject(error);
       })
   })
+}
+
+function fillUserBox(username) {
+  const userbox = document.getElementById('userbox');
+  userbox.textContent = `Signed as ${username}`;
+}
+
+function signInByToken() {
+  const token = localStorage.getItem('token');
+
+  if (!token) return;
+
+  // 1. Send token to the server
+  const headers = new Headers();
+  headers.append('Content-Type', 'text/plain');
+
+  const request = new Request(`/users/auth/token?token=${token}`, {
+    method: 'GET',
+    headers,
+    mode: 'same-origin'
+  })
+
+  // 2. If token is valid, get username from response
+  fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        return response.text().then((message) => {
+          throw new Error(message);
+        })
+      }
+    }).then((username) => {
+      if (!username) return;
+
+      // 3. Give visual indication of successful authentication
+      fillUserBox(username);
+
+      // 4. Display cart
+      displayCart();
+    }).catch((error) => log('Token is not valid or expired. Refused to authenticate automatically.'))
 }
