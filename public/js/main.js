@@ -10,6 +10,7 @@ const signUpTpl = document.getElementById('sign-up-template');
 const signInTpl = document.getElementById('sign-in-template');
 const cartTpl = document.getElementById('cart-template');
 const cartView = document.getElementById('cart');
+const cartToggle = document.getElementById('cart-toggle');
 
 // Number of days after cart cookie will expire
 const expDays = 5;
@@ -122,10 +123,13 @@ function removeFromCart(ev) {
 }
 
 function toggleCart(ev) {
-  const cart = document.getElementById('cart');
-
-  cart.classList.toggle('onscreen');
+  cartView.classList.toggle('onscreen');
   cartToggle.classList.toggle('onscreen');
+}
+
+function displayCart() {
+  cartView.classList.add('visible');
+  cartToggle.classList.add('visible');
 }
 
 function fillStoreTemplate() {
@@ -150,7 +154,6 @@ function addStoreEventListeners() {
 function addCartEventListeners() {
   const buttons = Array.from(document.getElementsByClassName('remove'));
   const inputs = Array.from(document.getElementsByClassName('quantity'));
-  const cartToggle = document.querySelector('.cart-toggle');
 
   cartToggle.addEventListener('click', toggleCart);
 
@@ -360,6 +363,9 @@ function sendSignInRequest(request, username) {
         // 4. Give visual indication of successful authentication
         const userbox = document.getElementById('userbox');
         userbox.textContent = `Signed as ${username}`;
+
+        // 5. Display cart
+        displayCart();
 
         resolve();
       }).catch((error) => {

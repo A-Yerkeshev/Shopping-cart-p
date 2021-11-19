@@ -206,18 +206,22 @@ nav a {
   transform: translateX(100vw);
   transition: transform 0.8s;
 
-  display: flex;
+  display: none;
   flex-direction: column;
   padding: 1rem;
   gap: 1rem;
   padding-top: 6rem;
 }
 
+#cart.visible {
+  display: flex;
+}
+
 #cart.onscreen {
   transform: translateX(0);
 }
 
-.cart-toggle {
+#cart-toggle {
   position: fixed;
   width: 6rem;
   height: 4rem;
@@ -234,12 +238,16 @@ nav a {
   border-radius: 0.4rem 0 0 0.4rem;
   padding: 0 0.4rem 0 0.8rem;
 
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: space-between;
 }
 
-.cart-toggle.onscreen {
+#cart-toggle.visible {
+  display: flex;
+}
+
+#cart-toggle.onscreen {
   transform: translateX(0);
 }
 
