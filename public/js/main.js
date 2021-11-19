@@ -307,11 +307,29 @@ function signIn(ev) {
     .then((response) => {
       if (response.ok) {
         log(`User successfully signed in.`);
+        return response.text();
       } else {
         return response.text().then((message) => {
           throw new Error(message);
         })
       }
+    }).then((token) => {
+      // 1. Verify that token is a string
+      if (typeof token !== 'string') {
+        throw new Error('Token came from server is not of "string" type.');
+        return;
+      }
+
+      // 2. Save token in local storage
+      localStorage.setItem('token', token);
+
+      // 3. Redirect to homepage
+      location.href = '/#';
+
+      // 4. Give visual indication of successful authentication
+      const userbox = document.getElementById('userbox');
+      userbox.textContent = `Signed as ${username}`;
+
     }).catch((error) => {
       const userInput = document.getElementById('username');
       const passInput = document.getElementById('password');

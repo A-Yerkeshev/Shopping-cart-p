@@ -46,6 +46,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const skey = process.env.STRIPE_SKEY;
 const pkey = process.env.STRIPE_PKEY;
+const jwtkey = process.env.JWT_KEY;
 
 client.connect((error) => {
   if (error) {log('Database connection error: ', error.stack)} else {
@@ -173,9 +174,16 @@ app.post('/users/auth', async (request, response) => {
 
     if (correctPass) {
       // 4. If everything is ok - log user in
+      // 4.1 Generate token
+      const payload = {
+        id: user.id,
+        username: user.username,
+        expires: Math.floor(Date.now()/1000) + 60*60*12
+      }
 
+      const token = jwt.sign(payload, jwtkey);
 
-      response.status(200).send(`User successfully loged in.`);
+      response.status(200).send(token);
     } else {
       response.status(401).send('Password is not correct.');
     }
@@ -231,4 +239,4 @@ function comparePasswords(password, hash) {
 
 app.listen(process.env.PORT || 3000);
 
-console.log('Server is running');
+log('Server is running');

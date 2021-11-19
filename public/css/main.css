@@ -79,11 +79,20 @@ nav {
   font-size: 1.2rem;
   width: 100%;
   padding: 0.4rem;
+  color: var(--white);
+  overflow: auto;
 }
 
 nav a {
   color: var(--white);
   margin: 0 1rem;
+}
+
+#userbox {
+  margin: 0.6rem 0;
+  font-size: 1rem;
+  float: right;
+  text-decoration: underline;
 }
 
 /*** STORE ********************************************************/
