@@ -2,9 +2,10 @@
   --yellow: #fff000;
   --yellow-pale: #ffff99;
   --yellow-shade: #999900;
+  --orange: #ff7000;
+  --orange-dark: #ff5000;
   --black: #403530;
   --white: #f9f7f7;
-  --error-bg: #ed5f5f;
   --orbitron: orbitron, 'Courier New', monospace;
 }
 
@@ -264,6 +265,22 @@ nav a {
   transform: translateX(0);
 }
 
+#cart-toggle.new::before {
+  content: '!';
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+
+  color: white;
+  background-color: var(--orange-dark);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .cart-item {
   border: 1px solid var(--black);
   display: flex;
@@ -298,3 +315,22 @@ nav a {
   background-color: transparent;
   border-radius: 50%;
 }
+
+.pay {
+  float: right;
+  font-size: 1.4rem;
+  font-weight: bold;
+  padding: 0.4rem;
+  width: max-content;
+  background-color: var(--orange);
+  border: 5px solid white;
+  text-shadow: 0px 2px 4px var(--black);
+  box-shadow: 0px 3px 5px var(--orange);
+  color: white;
+}
+
+.pay:active {
+  background-color: var(--orange-dark);
+  box-shadow: 0px 3px 10px var(--orange-dark);
+}
+

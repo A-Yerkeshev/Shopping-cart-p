@@ -77,9 +77,9 @@ function addToCart(ev) {
     return;
   }
 
-  // If cart cookie was found:
+  // 2. If cart cookie was found:
   if (cart) {
-    // Check if selected item already present in the cart
+    // 3. Check if selected item already present in the cart
     let match;
 
     for (let i=0; i<(cart.length); i++) {
@@ -91,32 +91,35 @@ function addToCart(ev) {
     }
 
     if (match) {
-      // If it is, check what triggered addToCart function
+      // 3.1 If it is, check what triggered addToCart function
       if (ev.target.value) {
-        // If it was triggered by input field - set new quantity
+        // 3.1.1 If it was triggered by input field - set new quantity
         match.quantity = ev.target.value;
       } else {
-        // If it was triggered by button - increase quantity by 1
+        // 3.1.2 If it was triggered by button - increase quantity by 1
         match.quantity++;
       }
     } else {
-      // Otherwise add new entry to cart
+      // 3.2 Otherwise add new entry to cart
       cart.push({
         id: itemId,
         quantity: 1
       })
     }
   } else {
-    // Otherwise create cart and add frist item
+    // 4. Otherwise create cart and add frist item
     cart = [{
       id: itemId,
       quantity: 1
     }]
   }
 
-  // Update cart cookie
+  // 5. Update cart cookie
   setCookie('cart', cart, 1000*60*60*24*expDays);
   updateCart();
+
+  // 6. Add visual indetification of new item
+  cartToggle.classList.add('new');
 }
 
 function removeFromCart(ev) {
@@ -137,6 +140,8 @@ function removeFromCart(ev) {
 function toggleCart(ev) {
   cartView.classList.toggle('onscreen');
   cartToggle.classList.toggle('onscreen');
+
+  cartToggle.classList.remove('new');
 }
 
 function displayCart() {
