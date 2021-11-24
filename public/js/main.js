@@ -32,6 +32,8 @@ Router.default('/');
 // Try to sign user in if valid token is present in local storage
 signInByToken();
 
+addCloseDescriptionListener();
+
 function updateCart() {
   const cart = getCookie('cart');
   const items = [];
@@ -72,6 +74,7 @@ function addToCart(ev) {
   // 1. If user is not signed in - redirect to login page
   if (!signedIn) {
     location.href = '/#sign-in';
+    return;
   }
 
   // If cart cookie was found:
@@ -426,4 +429,13 @@ function signInByToken() {
       // 4. Display cart
       displayCart();
     }).catch((error) => log('Token is not valid or expired. Refused to authenticate automatically.'))
+}
+
+function addCloseDescriptionListener() {
+  const descr = document.getElementsByClassName('descr')[0];
+  const close = descr.querySelector('.fa-times');
+
+  close.addEventListener('click', () => {
+    descr.remove();
+  })
 }

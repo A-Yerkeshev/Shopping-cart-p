@@ -95,6 +95,19 @@ nav a {
   text-decoration: underline;
 }
 
+.descr {
+  background-color: var(--yellow-pale);
+  font-size: 0.4rem;
+  margin: 0.4rem;
+  padding: 0.6rem 1.8rem 0.6rem 0.6rem;
+  text-align: justify;
+}
+
+.descr .fa-times {
+  float: right;
+  margin-right: -0.8rem;
+}
+
 /*** STORE ********************************************************/
 
 .item {
@@ -143,7 +156,7 @@ nav a {
   font-size: 1.8rem;
   text-align: center;
   width: 55%;
-  margin: auto;
+  margin: 1.2rem auto;
   padding: 0 0 0.4rem 0;
   position: relative;
 }
