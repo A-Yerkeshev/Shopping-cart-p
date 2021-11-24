@@ -17,6 +17,7 @@ const expDays = 5;
 const Data = {
   items: null
 }
+let signedIn = false;
 
 Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
@@ -67,6 +68,11 @@ function updateCart() {
 function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
   let cart = getCookie('cart');
+
+  // 1. If user is not signed in - redirect to login page
+  if (!signedIn) {
+    location.href = '/#sign-in';
+  }
 
   // If cart cookie was found:
   if (cart) {
@@ -363,6 +369,8 @@ function sendSignInRequest(request, username) {
         // 3. Redirect to homepage
         location.href = '/#';
 
+        signedIn = true;
+
         // 4. Give visual indication of successful authentication
         fillUserBox(username);
 
@@ -408,6 +416,9 @@ function signInByToken() {
       }
     }).then((username) => {
       if (!username) return;
+
+      // 3. Set current user
+      signedIn = true;
 
       // 3. Give visual indication of successful authentication
       fillUserBox(username);
