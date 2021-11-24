@@ -38,6 +38,9 @@ signInByToken();
 
 addCloseDescriptionListener();
 
+// Add new item indicator to cart button if cart is not empty
+initialIndicator();
+
 function updateCart() {
   const cart = getCookie('cart');
   const items = [];
@@ -465,6 +468,14 @@ function addCloseDescriptionListener() {
   close.addEventListener('click', () => {
     descr.remove();
   })
+}
+
+function initialIndicator() {
+  const cart = getCookie('cart');
+
+  if (cart.length > 0) {
+    cartToggle.classList.add('new');
+  }
 }
 
 function checkout() {
