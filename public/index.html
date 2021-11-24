@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="content-security-policy"
-  content="default-src 'self' http://localhost:35729 ws://localhost:35729;">
+  content="default-src 'self' http://localhost:35729 ws://localhost:35729;
+  script-src 'self' http://localhost:35729 ws://localhost:35729 https://checkout.stripe.com/checkout.js">
   <title>Shopping Cart</title>
   <link rel="stylesheet" type="text/css" href="fontawesome/css/all.css">
   <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -19,7 +20,7 @@
     <span id="userbox"></span>
   </nav>
   <div class="container">
-    <p class="descr"><i class="fas fa-times"></i>This is a demo web store, with simulation of card payment system. No actual money are going to be charged from you if you confirm a payment. However, for security reasons, it is not recommended to provide any real credentials - any fake credit card number is going to work just fine.</p>
+    <p class="descr"><i class="fas fa-times"></i>This is a demo web store, with simulation of card payment system. No actual money are going to be charged from you if you confirm a payment. However, for security reasons, it is not recommended to provide any real credentials - use 4242 4242 4242 4242 as card number and any future expirity date.</p>
     <button id="cart-toggle">
       <i class="fas fa-shopping-cart"></i>
       <i class="fas fa-angle-right"></i>

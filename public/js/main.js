@@ -14,10 +14,14 @@ const cartToggle = document.getElementById('cart-toggle');
 
 // Number of days after cart cookie will expire
 const expDays = 5;
+
 const Data = {
   items: null
 }
 let signedIn = false;
+
+// Define variables for stripe config
+let stripeHandler;
 
 Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
@@ -109,6 +113,9 @@ function addToCart(ev) {
       } else {
         // 3.1.2 If it was triggered by button - increase quantity by 1
         match.quantity++;
+
+        // 3.1.3 Add visual indetification of new item
+        cartToggle.classList.add('new');
       }
     } else {
       // 3.2 Otherwise add new entry to cart
@@ -116,6 +123,8 @@ function addToCart(ev) {
         id: itemId,
         quantity: 1
       })
+
+      cartToggle.classList.add('new');
     }
   } else {
     // 4. Otherwise create cart and add frist item
@@ -123,14 +132,13 @@ function addToCart(ev) {
       id: itemId,
       quantity: 1
     }]
+
+    cartToggle.classList.add('new');
   }
 
   // 5. Update cart cookie
   setCookie('cart', cart, 1000*60*60*24*expDays);
   updateCart();
-
-  // 6. Add visual indetification of new item
-  cartToggle.classList.add('new');
 }
 
 function removeFromCart(ev) {
@@ -182,6 +190,7 @@ function addStoreEventListeners() {
 function addCartEventListeners() {
   const buttons = Array.from(document.getElementsByClassName('remove'));
   const inputs = Array.from(document.getElementsByClassName('quantity'));
+  const pay = document.getElementsByClassName('pay')[0];
 
   cartToggle.addEventListener('click', toggleCart);
 
@@ -192,6 +201,8 @@ function addCartEventListeners() {
   inputs.forEach((input) => {
     input.addEventListener('change', addToCart);
   })
+
+  pay.addEventListener('click', checkout);
 }
 
 function addSignUpEventListeners() {
@@ -454,4 +465,13 @@ function addCloseDescriptionListener() {
   close.addEventListener('click', () => {
     descr.remove();
   })
+}
+
+function checkout() {
+  fetch('/create-stripe-session')
+    .then(response => response.text())
+    .then(data => log('Session cteated.', data))
+    .catch((error) => {
+      log('Error creating new Stripe session: ', error);
+    })
 }

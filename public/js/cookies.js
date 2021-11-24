@@ -26,7 +26,7 @@ function getCookie(name) {
   return result;
 }
 
-function setCookie(key, value='', expirity) {
+function setCookie(key, value='', expirity, sameSite='Strict') {
   if (typeof key !== 'string') {
     throw new Error('First argument passed to setCookie() function must be of string type.');
     return;
@@ -35,6 +35,9 @@ function setCookie(key, value='', expirity) {
     throw new Error('Third argument passed to setCookie() function must be of number type.');
     return;
   }
+  if (sameSite !== 'Strict' && sameSite !== 'Lax' && sameSite !== 'None') {
+    throw new Error(`Argument value ${sameSite} is not valid as SameSite cookie value. Value should be 'Lax', 'Strict' or 'None'.`)
+  }
 
   const date = new Date();
 
@@ -42,7 +45,7 @@ function setCookie(key, value='', expirity) {
     date.setTime(date.getTime() + expirity);
   }
 
-  document.cookie = key + "=" + JSON.stringify(value) + ';' + date.toUTCString();
+  document.cookie = `${key}=${JSON.stringify(value)};${date.toUTCString()};SameSite=${sameSite}`;
 }
 
 export { getCookie, setCookie }

@@ -3,6 +3,7 @@ const { Client } = require("pg");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+let stripe = require("stripe");
 const log = console.log;
 let client;
 
@@ -58,7 +59,22 @@ client.connect((error) => {
 app.use('/', express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-free/'));
+
+// Setup Stripe
+stripe = stripe(skey);
+
+app.post('/create-stripe-session', async (request, response) => {
+  const session = await stripe.checkout.sessions.create({
+    success_url: 'https://example.com/success',
+    cancel_url: 'https://example.com/cancel',
+    mode: 'payment'
+  })
+
+  log('Stripe session successfully initialized.')
+  response.status(201).send('Stripe session successfully initialized.');
+})
 
 // Get products data from database and send it
 app.get('/products', (request, response) => {
