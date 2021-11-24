@@ -62,8 +62,19 @@ function updateCart() {
     })
   }
 
+  const total = items.reduce((prev, curr) => {
+    const price = parseFloat(curr.price.substring(1));
+
+    return prev + price*curr.quantity;
+  }, 0)
+
+  const data = {
+    items,
+    total: total.toFixed(2)
+  }
+
   cartView.innerHTML = '';
-  cartView.appendChild(fillTemplate(cartTpl, { items }));
+  cartView.appendChild(fillTemplate(cartTpl, data));
   addCartEventListeners();
 }
 

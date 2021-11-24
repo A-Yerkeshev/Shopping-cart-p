@@ -316,6 +316,10 @@ nav a {
   border-radius: 50%;
 }
 
+.total {
+  font-size: 1.2rem;
+}
+
 .pay {
   float: right;
   font-size: 1.4rem;
@@ -325,12 +329,12 @@ nav a {
   background-color: var(--orange);
   border: 5px solid white;
   text-shadow: 0px 2px 4px var(--black);
-  box-shadow: 0px 3px 5px var(--orange);
+  box-shadow: 0px 1px 5px var(--orange);
   color: white;
 }
 
 .pay:active {
   background-color: var(--orange-dark);
-  box-shadow: 0px 3px 10px var(--orange-dark);
+  box-shadow: 0px 1px 10px var(--orange-dark);
 }
 
