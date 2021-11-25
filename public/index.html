@@ -73,7 +73,7 @@
     <img src="/img/{{ item.image }}" alt="{{ item.name }}">
     <div class="item-descr">
       <h2>{{ item.name }}</h2>
-      <span class="price">{{ item.price }}</span>
+      <span class="price">${{ item.price }}</span>
       <button class="add" data-id="{{ item.id }}">Add to cart</button>
     </div>
   </div>
@@ -84,7 +84,7 @@
     <div class="cart-item">
       <h3>{{ item.name }}</h3>
       <img src="/img/{{ item.image }}" alt="{{ item.name }}">
-      <span>{{ item.price }}</span>
+      <span>${{ item.displayPrice }}</span>
       <input class="quantity" type="number" value="{{ item.quantity }}" data-id="{{ item.id }}">
       <button class="remove" data-id="{{ item.id }}"><i class="fas fa-times"></i></button>
     </div>

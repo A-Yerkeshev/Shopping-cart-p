@@ -66,13 +66,73 @@ app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-fr
 stripe = stripe(skey);
 
 app.post('/create-stripe-session', async (request, response) => {
-  const session = await stripe.checkout.sessions.create({
-    success_url: 'https://example.com/success',
-    cancel_url: 'https://example.com/cancel',
-    mode: 'payment'
+  const cart = request.body.cart;
+  const token = request.body.token;
+  let userId, username;
+
+  // 1. Verify token
+  try {
+    const payload = jwt.verify(token, jwtkey);
+
+    userId = payload.id;
+    username = payload.username;
+  } catch(error) {
+    response.status(401).send('Authorization token is invalid or expired.');
+    return;
+  }
+
+  // 2. Verify that cart items have correct names, ids and prices
+  let total = 0;
+
+  cart.forEach((item) => {
+    const query = `SELECT id, name, price FROM products WHERE id = '${item.id}'`;
+
+    client.query(query, (error, data) => {
+      if (error) {
+        log('Database query error: ', error.stack);
+        response.status(500).send('Error occured when attempting to verify item against database.');
+      } else {
+        // 2.1 Check if item was found in database
+        if (!data.rows[0]) {
+          response.status(500).send(`Item with id ${item.id} is not found in database.`);
+          return;
+        }
+
+        // 2.2 Verify name and price
+        if (data.rows[0].name !== item.name) {
+          response.status(500).send(`Item with id ${item.id} does not have a matching name.`);
+          return;
+        }
+
+        if (data.rows[0].price !== item.price) {
+          response.status(500).send(`Item with id ${item.id} does not have a matching price.`);
+          return;
+        }
+
+        // 3. Add item price to total
+        //const price = parseFloat(item.price.substring(1));
+      }
+    })
   })
 
-  log('Stripe session successfully initialized.')
+  // 3. Verify that total amount to be charged is correct
+  // const total = cart.reduce((prev, curr) => {
+  //   const price = parseFloat(curr.price.substring(1));
+
+  //   return prev + price*curr.quantity;
+  // }, 0)
+
+  // 3. Create new session
+  // const session = await stripe.checkout.sessions.create({
+  //   success_url: `https://example.com/success`,
+  //   cancel_url: `https://example.com/cancel`,
+  //   line_items: cart,
+  //   mode: 'payment'
+  // })
+
+  // log('Stripe session successfully initialized.');
+  // log('Cart: ', cart);
+  // log('Token: ', token);
   response.status(201).send('Stripe session successfully initialized.');
 })
 
@@ -201,10 +261,10 @@ app.post('/users/auth', async (request, response) => {
 
       response.status(200).send(token);
     } else {
-      response.status(401).send('Password is not correct.');
+      response.status(400).send('Password is not correct.');
     }
   } else {
-    response.status(401).send(`User with name "${username}" is not found.`);
+    response.status(400).send(`User with name "${username}" is not found.`);
   }
 })
 

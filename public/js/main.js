@@ -57,6 +57,7 @@ function updateCart() {
             name: Data.items[i].name,
             image: Data.items[i].image,
             price: Data.items[i].price,
+            displayPrice: ((Data.items[i].price)/100).toFixed(2),
             quantity: entry.quantity
           }
           break;
@@ -70,10 +71,8 @@ function updateCart() {
   }
 
   const total = items.reduce((prev, curr) => {
-    const price = parseFloat(curr.price.substring(1));
-
-    return prev + price*curr.quantity;
-  }, 0)
+    return prev + curr.price*curr.quantity;
+  }, 0)/100
 
   const data = {
     items,
@@ -173,11 +172,37 @@ function displayCart() {
 
 function fillStoreTemplate() {
   if (Data.items) {
-    return fillTemplate(store, {items: Data.items});
+    const items = Data.items.map((item) => {
+      // Convert price from cent to floating dollar notation
+
+      const result = {
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        price: (item.price/100).toFixed(2)
+      }
+
+      return result;
+    })
+
+    return fillTemplate(store, { items });
   } else {
     return new Promise((resolve, reject) => {
       fetchItems()
-        .then((data) => resolve(fillTemplate(store, {items: data})));
+        .then((data) => {
+          const items = data.map((item) => {
+            const result = {
+              id: item.id,
+              name: item.name,
+              image: item.image,
+              price: (item.price/100).toFixed(2)
+            }
+
+            return result;
+          })
+
+          resolve(fillTemplate(store, { items }));
+        })
     })
   }
 }
@@ -479,10 +504,76 @@ function initialIndicator() {
 }
 
 function checkout() {
-  fetch('/create-stripe-session')
-    .then(response => response.text())
-    .then(data => log('Session cteated.', data))
+  // 1. Verify that user is signed in
+  if (!signedIn) {
+    location.href = '/#sign-in';
+    return;
+  }
+
+  // 2. Get cart and auth token
+  const cart = getCookie('cart');
+  const token = localStorage.getItem('token');
+
+  if (!cart) {
+    throw new Error(`Something went wrong. Cart is ${cart}.`);
+    return;
+  }
+
+  if (!token) {
+    throw new Error(`No authentication token is present in local storage.`);
+    return;
+  }
+
+  // 3. Add item name and price to cart items for verification on server side
+  cart.forEach((item) => {
+    let match = false;
+
+    for (let i=0; i<(Data.items.length); i++) {
+      if (Data.items[i].id == item.id) {
+        item.name = Data.items[i].name;
+        item.price = Data.items[i].price;
+
+        match = true;
+        break;
+      }
+    }
+
+    if (match == false) {
+      throw new Error(`Item with invalid id ${item.id} is present in the cart cookie.`);
+      return;
+    }
+  })
+
+  const data = {
+    cart,
+    token
+  }
+
+  // 4. Create request
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/json');
+
+  const request = new Request('/create-stripe-session', {
+    method: 'POST',
+    headers,
+    mode: 'same-origin',
+    body: JSON.stringify(data)
+  })
+
+  fetch(request)
+    .then(response => response.json())
+    .then((session) => {
+      return stripe.redirectToCheckout({ sessionId: session.id });
+    })
+    .then((result) => {
+      // If `redirectToCheckout` fails due to a browser or network
+      // error, you should display the localized error message to your
+      // customer using `error.message`.
+      if (result.error) {
+        alert(result.error.message);
+      }
+    })
     .catch((error) => {
-      log('Error creating new Stripe session: ', error);
+      log('Error proceeding to payment: ', error);
     })
 }
