@@ -36,7 +36,7 @@ if (process.env.NODE_ENV !== 'production') {
     password: process.env.DB_PASSWORD
   })
 } else {
-  // Connect to Heroku database
+  // 1. Connect to Heroku database
   client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -65,7 +65,12 @@ app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-fr
 // Setup Stripe
 stripe = stripe(skey);
 
-app.post('/create-stripe-session', async (request, response) => {
+// Expose public key
+app.get('/stripe-pkey', (request, response) => {
+  response.status(200).send(pkey);
+})
+
+app.post('/create-checkout-session', async (request, response) => {
   const cart = request.body.cart;
   const token = request.body.token;
   const total = request.body.total;
@@ -143,23 +148,28 @@ app.post('/create-stripe-session', async (request, response) => {
       })
 
       // 4. Create new session
+      const successUrl = `${request.protocol}://${request.get('host')}/#payment-success`;
+      const cancelUrl = `${request.protocol}://${request.get('host')}/#payment-cancel`;
+      log('Success url: ', successUrl)
+
       const sessionPromise = stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: line,
         mode: 'payment',
-        success_url: 'https://example.com/success',
-        cancel_url: 'https://example.com/cancel',
+        success_url: successUrl,
+        cancel_url: cancelUrl
       })
 
       return sessionPromise;
     }).then((session) => {
-      log('New checkout session successfully initialized.', session);
+      log('New checkout session successfully initialized.', session.id);
+
+      // 5. Send session id to the client
+      response.status(201).send(session.id);
     }).catch((error) => {
-      log('Database query error: ', error.stack);
+      log('Error creating checkout session: ', error.stack);
       response.status(500).send('Error occured when attempting to verify cart items.');
     })
-
-  response.status(201).send('Stripe session successfully initialized.');
 })
 
 // Get products data from database and send it

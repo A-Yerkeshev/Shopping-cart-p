@@ -11,6 +11,8 @@ const signInTpl = document.getElementById('sign-in-template');
 const cartTpl = document.getElementById('cart-template');
 const cartView = document.getElementById('cart');
 const cartToggle = document.getElementById('cart-toggle');
+const paymentSuccessTpl = document.getElementById('payment-success-template');
+const paymentCancelTpl = document.getElementById('payment-cancel-template');
 
 // Number of days after cart cookie will expire
 const expDays = 5;
@@ -20,18 +22,21 @@ const Data = {
 }
 let signedIn = false;
 
-// Define variables for stripe config
-let stripeHandler;
-
 Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
-Router.when('/store', fillStoreTemplate);
-Router.onload('/store', addStoreEventListeners);
-Router.when('/sign-up', signUpTpl.content);
-Router.onload('/sign-up', addSignUpEventListeners);
-Router.when('/sign-in', signInTpl.content);
-Router.onload('/sign-in', addSignInEventListeners);
+Router.when('store', fillStoreTemplate);
+Router.onload('store', addStoreEventListeners);
+Router.when('sign-up', signUpTpl.content);
+Router.onload('sign-up', addSignUpEventListeners);
+Router.when('sign-in', signInTpl.content);
+Router.onload('sign-in', addSignInEventListeners);
+Router.when('payment-success', paymentSuccessTpl.content);
+Router.when('payment-cancel', paymentCancelTpl.content);
 Router.default('/');
+
+// Initialize stripe
+let stripe;
+initStripe();
 
 // Try to sign user in if valid token is present in local storage
 signInByToken();
@@ -503,6 +508,23 @@ function initialIndicator() {
   }
 }
 
+function initStripe() {
+  // 1. Get stripe public key from the server
+  fetch('/stripe-pkey')
+    .then((response) => response.text())
+    .then((key) => {
+      if (!key) {
+        throw new Error('Invalid value for Stripe public key.');
+        return;
+      }
+
+      // 2. Activate Stripe using public key
+      stripe = Stripe(key);
+    }).catch((error) => {
+      log('Error fetching Stripe public key.', error);
+    })
+}
+
 function checkout() {
   // 1. Verify that user is signed in
   if (!signedIn) {
@@ -559,7 +581,7 @@ function checkout() {
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
 
-  const request = new Request('/create-stripe-session', {
+  const request = new Request('/create-checkout-session', {
     method: 'POST',
     headers,
     mode: 'same-origin',
@@ -567,19 +589,22 @@ function checkout() {
   })
 
   fetch(request)
-    .then(response => response.json())
-    .then((session) => {
-      return stripe.redirectToCheckout({ sessionId: session.id });
-    })
-    .then((result) => {
-      // If `redirectToCheckout` fails due to a browser or network
-      // error, you should display the localized error message to your
-      // customer using `error.message`.
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        return response.text().then((message) => {
+          throw new Error(message);
+        })
+      }
+    }).then((sessionId) => {
+      return stripe.redirectToCheckout({ sessionId });
+    }).then((result) => {
       if (result.error) {
         alert(result.error.message);
       }
     })
     .catch((error) => {
-      log('Error proceeding to payment: ', error);
+      log('Error proceeding to payment: ', error.message);
     })
 }

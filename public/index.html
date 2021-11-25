@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta http-equiv="content-security-policy"
   content="default-src 'self' http://localhost:35729 ws://localhost:35729;
-  script-src 'self' http://localhost:35729 ws://localhost:35729 https://checkout.stripe.com/checkout.js">
+    script-src 'self' http://localhost:35729 ws://localhost:35729 https://js.stripe.com/v3/;
+    frame-src 'self' http://localhost:35729 ws://localhost:35729 https://js.stripe.com/v3/">
   <title>Shopping Cart</title>
   <link rel="stylesheet" type="text/css" href="fontawesome/css/all.css">
   <link rel="stylesheet" type="text/css" href="css/main.css">
+  <script src="https://js.stripe.com/v3/" defer></script>
 </head>
 <body>
   <header>
@@ -91,6 +93,14 @@
   </repeat>
   <b class="total">Total: ${{ total }}</b>
   <button class="pay">Go to Payment</button>
+</template>
+
+<template id="payment-success-template">
+  Payment successful!
+</template>
+
+<template id="payment-cancel-template">
+  Payment was canceled
 </template>
 
 </html>
