@@ -125,18 +125,39 @@ app.post('/create-stripe-session', async (request, response) => {
         throw new Error(`Total purchase amount ${totalVer} does not match price that was displayed to the user ${total}.`);
         return;
       }
+    }).then(() => {
+      // 3. Build line items array from cart items
+      const line = [];
+
+      cart.forEach((item) => {
+        line.push({
+          price_data: {
+            currency: 'USD',
+            product_data: {
+              name: item.name
+            },
+            unit_amount: item.price
+          },
+          quantity: item.quantity
+        })
+      })
+
+      // 4. Create new session
+      const sessionPromise = stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: line,
+        mode: 'payment',
+        success_url: 'https://example.com/success',
+        cancel_url: 'https://example.com/cancel',
+      })
+
+      return sessionPromise;
+    }).then((session) => {
+      log('New checkout session successfully initialized.', session);
     }).catch((error) => {
       log('Database query error: ', error.stack);
       response.status(500).send('Error occured when attempting to verify cart items.');
     })
-
-  // 3. Create new session
-  // const session = await stripe.checkout.sessions.create({
-  //   success_url: `https://example.com/success`,
-  //   cancel_url: `https://example.com/cancel`,
-  //   line_items: cart,
-  //   mode: 'payment'
-  // })
 
   response.status(201).send('Stripe session successfully initialized.');
 })
