@@ -544,12 +544,18 @@ function checkout() {
     }
   })
 
+  // 4. Get total price that was displayed to the user
+  const totalText = document.querySelector('b.total').textContent;
+  const totalString = totalText.substring(totalText.indexOf('$')+1).trim();
+  const total = Math.round(parseFloat(totalString)*100);
+
   const data = {
     cart,
-    token
+    token,
+    total
   }
 
-  // 4. Create request
+  // 5. Create request
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
 

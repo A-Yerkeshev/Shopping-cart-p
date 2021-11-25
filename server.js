@@ -68,6 +68,7 @@ stripe = stripe(skey);
 app.post('/create-stripe-session', async (request, response) => {
   const cart = request.body.cart;
   const token = request.body.token;
+  const total = request.body.total;
   let userId, username;
 
   // 1. Verify token
@@ -81,46 +82,53 @@ app.post('/create-stripe-session', async (request, response) => {
     return;
   }
 
-  // 2. Verify that cart items have correct names, ids and prices
-  let total = 0;
+  // 2. Make a database query for every item in the cart to validate it
+  const queryCalls = [];
 
   cart.forEach((item) => {
     const query = `SELECT id, name, price FROM products WHERE id = '${item.id}'`;
 
-    client.query(query, (error, data) => {
-      if (error) {
-        log('Database query error: ', error.stack);
-        response.status(500).send('Error occured when attempting to verify item against database.');
-      } else {
-        // 2.1 Check if item was found in database
-        if (!data.rows[0]) {
-          response.status(500).send(`Item with id ${item.id} is not found in database.`);
-          return;
-        }
-
-        // 2.2 Verify name and price
-        if (data.rows[0].name !== item.name) {
-          response.status(500).send(`Item with id ${item.id} does not have a matching name.`);
-          return;
-        }
-
-        if (data.rows[0].price !== item.price) {
-          response.status(500).send(`Item with id ${item.id} does not have a matching price.`);
-          return;
-        }
-
-        // 3. Add item price to total
-        //const price = parseFloat(item.price.substring(1));
-      }
-    })
+    queryCalls.push(client.query(query));
   })
 
-  // 3. Verify that total amount to be charged is correct
-  // const total = cart.reduce((prev, curr) => {
-  //   const price = parseFloat(curr.price.substring(1));
+  // 3. Verify that cart items have correct names, ids and prices after all queries were complete
+  let totalVer = 0;
 
-  //   return prev + price*curr.quantity;
-  // }, 0)
+  Promise.all(queryCalls)
+    .then((results) => {
+      for (let i=0; i<(results.length); i++) {
+        const item = results[i].rows[0];
+
+        // 3.1 Check if item was found in database
+        if (!item) {
+          throw new Error(`Item with id ${cart[i].id} is not found in database.`);
+          return;
+        }
+
+        // 3.2 Verify name and price
+        if (item.name !== cart[i].name) {
+          throw new Error(`Item with id ${cart[i].id} does not have a matching name '${cart[i].name}'.`);
+          return;
+        }
+
+        if (item.price !== cart[i].price) {
+          throw new Error(`Item with id ${cart[i].id} does not have a matching price ${cart[i].price}.`);
+          return;
+        }
+
+        // 4. Add item price to total
+        totalVer += item.price*cart[i].quantity;
+      }
+
+      // 3. Verify that total amount to be charged is corresponds with price that user saw
+      if (total !== totalVer) {
+        throw new Error(`Total purchase amount ${totalVer} does not match price that was displayed to the user ${total}.`);
+        return;
+      }
+    }).catch((error) => {
+      log('Database query error: ', error.stack);
+      response.status(500).send('Error occured when attempting to verify cart items.');
+    })
 
   // 3. Create new session
   // const session = await stripe.checkout.sessions.create({
@@ -130,9 +138,6 @@ app.post('/create-stripe-session', async (request, response) => {
   //   mode: 'payment'
   // })
 
-  // log('Stripe session successfully initialized.');
-  // log('Cart: ', cart);
-  // log('Token: ', token);
   response.status(201).send('Stripe session successfully initialized.');
 })
 
