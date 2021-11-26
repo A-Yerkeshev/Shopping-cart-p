@@ -31,11 +31,15 @@ Router.onload('sign-up', addSignUpEventListeners);
 Router.when('sign-in', signInTpl.content);
 Router.onload('sign-in', addSignInEventListeners);
 Router.when('payment-success', paymentSuccessTpl.content);
+Router.onload('payment-success', clearCart);
 Router.when('payment-cancel', paymentCancelTpl.content);
 Router.onload('payment-cancel', () => {
   setTimeout(() => Router.redirect('/'), 3000)
 });
 Router.default('/');
+
+// Fetch items from the server
+fetchItems();
 
 // Initialize stripe
 let stripe;
@@ -619,4 +623,8 @@ function checkout() {
     .catch((error) => {
       log('Error proceeding to payment: ', error.message);
     })
+}
+
+function clearCart() {
+  setCookie('cart', [], 1000*60*60*24*expDays);
 }
