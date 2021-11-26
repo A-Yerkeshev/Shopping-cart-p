@@ -74,7 +74,7 @@ app.post('/create-checkout-session', async (request, response) => {
   const cart = request.body.cart;
   const token = request.body.token;
   const total = request.body.total;
-  let userId, username;
+  let userId, username, email;
 
   // 1. Verify token
   try {
@@ -82,6 +82,7 @@ app.post('/create-checkout-session', async (request, response) => {
 
     userId = payload.id;
     username = payload.username;
+    email = payload.email;
   } catch(error) {
     response.status(401).send('Authorization token is invalid or expired.');
     return;
@@ -151,13 +152,17 @@ app.post('/create-checkout-session', async (request, response) => {
       const successUrl = `${request.protocol}://${request.get('host')}/#payment-success`;
       const cancelUrl = `${request.protocol}://${request.get('host')}/#payment-cancel`;
 
-      const sessionPromise = stripe.checkout.sessions.create({
+      const sessionData = {
         payment_method_types: ['card'],
         line_items: line,
         mode: 'payment',
         success_url: successUrl,
         cancel_url: cancelUrl
-      })
+      }
+
+      if (email) sessionData['customer_email'] = email;
+
+      const sessionPromise = stripe.checkout.sessions.create(sessionData)
 
       return sessionPromise;
     }).then((session) => {
@@ -318,6 +323,7 @@ app.post('/users/auth', async (request, response) => {
       const payload = {
         id: user.id,
         username: user.username,
+        email: user.email,
         exp: Math.floor(Date.now()/1000) + 60*60*12
       }
 

@@ -353,6 +353,8 @@ nav a {
   text-align: center;
   display: flex;
   flex-direction: column;
+  margin: 0.8rem;
+  box-shadow: 0 6px 8px var(--yellow-shade);
   gap: 1.2rem;
 }
 
