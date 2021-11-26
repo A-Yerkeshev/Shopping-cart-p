@@ -66,7 +66,7 @@ const Router = (() => {
 
     // Router.onload() tells which callback to run after the view for given route was drawn
     // Router.default() takes two arguments - url and callback
-    onload(url, ...callbacks) {
+    onload: function(url, ...callbacks) {
       if (!validateUrl(url, 'onload')) return;
 
       callbacks.forEach((callback) => {
@@ -98,6 +98,19 @@ const Router = (() => {
         throw new Error(`Route '${url}' is not defined. Use Router.when() to define new route.`);
         return;
       }
+
+      return this;
+    },
+
+    // Redirects user to given url
+    redirect: function(url) {
+      if (!validateUrl(url, 'redirect')) return;
+
+      url = stripUrl(url)
+
+      location.href = `/#${url}`;
+
+      return this;
     }
   }
 })();

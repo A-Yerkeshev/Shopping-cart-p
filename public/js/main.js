@@ -32,6 +32,9 @@ Router.when('sign-in', signInTpl.content);
 Router.onload('sign-in', addSignInEventListeners);
 Router.when('payment-success', paymentSuccessTpl.content);
 Router.when('payment-cancel', paymentCancelTpl.content);
+Router.onload('payment-cancel', () => {
+  setTimeout(() => Router.redirect('/'), 3000)
+});
 Router.default('/');
 
 // Initialize stripe
