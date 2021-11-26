@@ -150,7 +150,6 @@ app.post('/create-checkout-session', async (request, response) => {
       // 4. Create new session
       const successUrl = `${request.protocol}://${request.get('host')}/#payment-success`;
       const cancelUrl = `${request.protocol}://${request.get('host')}/#payment-cancel`;
-      log('Success url: ', successUrl)
 
       const sessionPromise = stripe.checkout.sessions.create({
         payment_method_types: ['card'],

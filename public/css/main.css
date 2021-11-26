@@ -4,6 +4,7 @@
   --yellow-shade: #999900;
   --orange: #ff7000;
   --orange-dark: #ff5000;
+  --green: #00dd00;
   --black: #403530;
   --white: #f9f7f7;
   --orbitron: orbitron, 'Courier New', monospace;
@@ -37,6 +38,18 @@ body {
 
 input {
   font-size: 1.4rem;
+}
+
+.btn-orange {
+  background-color: var(--orange);
+  color: white;
+  width: max-content;
+  padding: 0.4rem 0.4rem 0.6rem;
+  font-size: 1.2rem;
+}
+
+.btn-orange:active {
+  background-color: var(--orange-dark);
 }
 
 /***************************************/
@@ -324,17 +337,39 @@ nav a {
   float: right;
   font-size: 1.4rem;
   font-weight: bold;
-  padding: 0.4rem;
-  width: max-content;
-  background-color: var(--orange);
   border: 5px solid white;
   text-shadow: 0px 2px 4px var(--black);
   box-shadow: 0px 1px 5px var(--orange);
-  color: white;
 }
 
 .pay:active {
-  background-color: var(--orange-dark);
   box-shadow: 0px 1px 10px var(--orange-dark);
 }
 
+/*** PAYMENTS ***********************************************************/
+.payment-message {
+  border: 2rem solid var(--yellow-pale);
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.payment-message .fa-check-circle {
+  color: var(--green);
+  font-size: 4.4rem;
+}
+
+.payment-message .fa-times-circle {
+  color: red;
+  font-size: 4rem;
+}
+
+.payment-message h3 {
+  font-weight: lighter;
+}
+
+.payment-message .btn-orange {
+  margin: auto;
+}

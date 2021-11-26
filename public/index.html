@@ -92,15 +92,24 @@
     </div>
   </repeat>
   <b class="total">Total: ${{ total }}</b>
-  <button class="pay">Go to Payment</button>
+  <button class="pay btn-orange">Go to Payment</button>
 </template>
 
 <template id="payment-success-template">
-  Payment successful!
+  <div class="payment-message">
+    <h2>Payment successful!</h2>
+    <i class="fas fa-check-circle"></i>
+    <h3>Thank you for your purchase. You can <a href="#orders">check your orders</a> or</h3>
+    <a href='/#' class="btn-orange">Continue browsing</a>
+  </div>
 </template>
 
 <template id="payment-cancel-template">
-  Payment was canceled
+  <div class="payment-message">
+    <h2>Payment was cancelled.</h2>
+    <i class="fas fa-times-circle"></i>
+    <span>Redirecting to home page after 3 seconds ...</span>
+  </div>
 </template>
 
 </html>
