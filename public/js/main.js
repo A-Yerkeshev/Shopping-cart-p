@@ -247,27 +247,28 @@ function addSignUpEventListeners() {
 
   form.addEventListener('submit', signUp);
 
-  // 1. Change default pattern mismatch message for input fields
+  // 1. Change default pattern mismatch message for input and email fields
   const userInput = form.querySelector('#username');
+  const emailInput = form.querySelector('#email');
+  const passInput = form.querySelector('#password');
+  const passRepInput = form.querySelector('#password-rep');
 
   if (userInput) inputs.push(userInput);
+  if (emailInput) inputs.push(emailInput);
+  if (passInput) inputs.push(passInput);
+  if (passRepInput) inputs.push(passRepInput);
 
   userInput.addEventListener('invalid', () => {
     patternMismatchMessage(userInput, 'Only A-Z, a-z, 0-9 and _ are allowed.');
   })
 
-
-  const passInput = form.querySelector('#password');
-
-  if (passInput) inputs.push(passInput);
+  emailInput.addEventListener('invalid', () => {
+    patternMismatchMessage(userInput, 'Email format is invalid.');
+  })
 
   passInput.addEventListener('invalid', () => {
     patternMismatchMessage(passInput, 'Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.');
   })
-
-
-  const passRepInput = form.querySelector('#password-rep');
-  if (passRepInput) inputs.push(passRepInput);
 
   // 2. Clear validation messages on input value change
   inputs.forEach((input) => {
@@ -312,6 +313,7 @@ function signUp(ev) {
 
   const formData = new FormData(ev.target);
   const username = formData.get('username').trim();
+  const email = formData.get('email').trim();
   const password = formData.get('password').trim();
   const passwordRep = formData.get('password-rep');
 
@@ -327,6 +329,7 @@ function signUp(ev) {
   // 2. Send registration request to the server
   const newUser = {
     username,
+    email,
     password
   }
 
@@ -345,15 +348,21 @@ function signUp(ev) {
       if (response.ok) {
         log(`New user "${username}" successfully registered.`);
       } else {
-        if (response.status == 409) {
+        return response.json().then((error) => {
           const userInput = document.getElementById('username');
+          const emailInput = document.getElementById('email');
 
-          userInput.setCustomValidity('Username is not available. Please, choose another name.');
-          userInput.reportValidity();
-        }
+          if (error.target === 'email') {
+            emailInput.setCustomValidity(error.message);
+            emailInput.reportValidity();
+          }
 
-        return response.text().then((message) => {
-          throw new Error(message);
+          if (error.target === 'username') {
+            userInput.setCustomValidity(error.message);
+            userInput.reportValidity();
+          }
+
+          throw new Error(error.message);
         })
       }
     }).then(() => {

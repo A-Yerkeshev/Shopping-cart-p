@@ -48,6 +48,8 @@
     <form>
       <label for="username">Name:</label>
       <input type="text" name="username" id="username" pattern="[A-Za-z0-9_]+$" maxlength="50" required>
+      <label for="email">e-mail:</label>
+      <input type="email" name="email" id="email" pattern="^[a-zA-Z0-9.!#$%&’*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" maxlength="50" required>
       <label for="password">Password:</label>
       <input type="password" name="password" id="password" pattern="[A-Za-z0-9_\-@\$\*#\+]+$" minlength="8" maxlength="50" required>
       <label for="password-rep">Repeat password:</label>

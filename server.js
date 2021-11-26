@@ -187,13 +187,21 @@ app.get('/products', (request, response) => {
 app.post('/users', async (request, response) => {
   // 1. Validate request object
   const username = request.body.username.trim();
+  const email = request.body.email.trim();
   const password = request.body.password.trim();
+
   const userRegEx = /[A-Za-z0-9_]+$/;
+  const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const passRegEx = /[A-Za-z0-9_\-@\$\*#\+]+$/;
 
   // 1.1 Check if value is present
   if (!username) {
     response.status(400).send(`Username is empty or invalid.`);
+    return;
+  }
+
+  if (!email) {
+    response.status(400).send(`Email is empty or invalid.`);
     return;
   }
 
@@ -208,6 +216,11 @@ app.post('/users', async (request, response) => {
     return;
   }
 
+  if (typeof email !== 'string') {
+    response.status(400).send(`Email is not a string.`);
+    return;
+  }
+
   if (typeof password !== 'string') {
     response.status(400).send(`Password is not a string.`);
     return;
@@ -219,6 +232,11 @@ app.post('/users', async (request, response) => {
     return;
   }
 
+  if (email.search(userRegEx) == -1) {
+    response.status(400).send(`Email contains invalid characters or does not match email pattern.`);
+    return;
+  }
+
   if (password.search(passRegEx) == -1) {
     response.status(400).send(`Password contains invalid characters. Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.`);
     return;
@@ -226,23 +244,34 @@ app.post('/users', async (request, response) => {
 
   // 2. Check that username is available
   if (await getUser(username) === null) {
-    // 3. Hash password
-    const hash = await bcrypt.hash(password, 13);
+    // 3. Check that email is available
+    if (await emailAvailable(email)) {
+      // 4. Hash password
+      const hash = await bcrypt.hash(password, 13);
 
-    // 4. Add new user to database
-    query = `INSERT INTO users(username, password) VALUES ('${username}', '${hash}')`;
+      // 5. Add new user to database
+      query = `INSERT INTO users(username, email, password) VALUES ('${username}', '${email}', '${hash}')`;
 
-    client.query(query, (error, data) => {
-      if (error) {
-        log('Database query error: ', error.stack);
-        response.status(500).send('Error occured when attempting to add new user to database.');
-      } else {
-        log(`User "${username}" successfully registered.`);
-        response.status(201).send(`User "${username}" successfully registered.`);
-      }
-    })
+      client.query(query, (error, data) => {
+        if (error) {
+          log('Database query error: ', error.stack);
+          response.status(500).send('Error occured when attempting to add new user to database.');
+        } else {
+          log(`User "${username}" successfully registered.`);
+          response.status(201).send(`User "${username}" successfully registered.`);
+        }
+      })
+    } else {
+      response.status(409).send({
+        target: 'email',
+        message: `User with this email is already registered.`
+      });
+    }
   } else {
-    response.status(409).send(`User with username "${username}" already registered.`);
+    response.status(409).send({
+      target: 'username',
+      message: `Username is not available. Please, choose another name.`
+    });
   }
 })
 
@@ -338,14 +367,14 @@ app.get('/users', (request, response) => {
 })
 
 function getUser(username) {
-  return new Promise((resolve) => {
-    const query = `SELECT id, username, password FROM users WHERE username = '${username}'`;
+  return new Promise((resolve, reject) => {
+    const query = `SELECT id, username, email, password FROM users WHERE username = '${username}'`;
 
     client.query(query, (error, data) => {
       if (error) {
         log('Database query error: ', error.stack);
         response.status(500).send('Error occured when attempting to get user from database.');
-        resolve(null);
+        reject();
       } else {
         if (data.rows.length === 0) {
           resolve(null);
@@ -366,6 +395,26 @@ function comparePasswords(password, hash) {
       }
 
       resolve(result);
+    })
+  })
+}
+
+function emailAvailable(email) {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT id FROM users WHERE email = '${email}'`;
+
+    client.query(query, (error, data) => {
+      if (error) {
+        log('Database query error: ', error.stack);
+        response.status(500).send('Error occured when attempting to check email availablility.');
+        reject();
+      } else {
+        if (data.rows.length === 0) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }
     })
   })
 }
