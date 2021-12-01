@@ -290,23 +290,35 @@ app.post('/users/auth', async (request, response) => {
 
   // 1.1 Check if value is present
   if (!username) {
-    response.status(400).send(`Username is empty or invalid.`);
+    response.status(400).send({
+      target: 'username',
+      message: `Username is empty or invalid.`
+    });
     return;
   }
 
   if (!password) {
-    response.status(400).send(`Password is empty or invalid.`);
+    response.status(400).send({
+      target: 'password',
+      message: `Password is empty or invalid.`
+    });
     return;
   }
 
   // 1.2 Check that it has correct type
   if (typeof username !== 'string') {
-    response.status(400).send(`Username is not a string.`);
+    response.status(400).send({
+      target: 'username',
+      message: `Username is not a string.`
+    });
     return;
   }
 
   if (typeof password !== 'string') {
-    response.status(400).send(`Password is not a string.`);
+    response.status(400).send({
+      target: 'password',
+      message: `Password is not a string.`
+    });
     return;
   }
 
@@ -331,10 +343,16 @@ app.post('/users/auth', async (request, response) => {
 
       response.status(200).send(token);
     } else {
-      response.status(400).send('Password is not correct.');
+      response.status(400).send({
+        target: 'password',
+        message: 'Password is not correct.'
+      });
     }
   } else {
-    response.status(400).send(`User with name "${username}" is not found.`);
+    response.status(400).send({
+      target: 'username',
+      message: `User with name "${username}" is not found.`
+    });
   }
 })
 
@@ -356,7 +374,10 @@ app.get('/users/auth/token', async (request, response) => {
       } else throw new Error('User is not found.');
     } else throw new Error('Token is not valid.');
   } catch(error) {
-    response.status(401).send(error.message);
+    response.status(401).send({
+      target: 'username',
+      message: error.message
+    });
   }
 })
 

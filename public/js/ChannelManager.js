@@ -159,7 +159,7 @@ const ChannelManager = (function() {
   }
 
   return {
-    openChannel(name) {
+    open(name) {
       if (!checkType(name, 'string', 'openChannel')) {return;}
       if (isEmptyString(name, 'openChannel')) {return;}
 
@@ -173,7 +173,7 @@ const ChannelManager = (function() {
         }
       }
     },
-    closeChannel(name) {
+    close(name) {
       if (!checkType(name, 'string', 'closeChannel')) {return;}
       if (isEmptyString(name, 'closeChannel')) {return;}
       if (!ChannelManager.exists(name)) {
@@ -183,7 +183,7 @@ const ChannelManager = (function() {
 
       delete channels[name];
     },
-    sendData(name, data, headers={}) {
+    send(name, data, headers={}) {
       // headers - data headers object
       if (arguments.length < 2) {
         throw new Error('.sendData() function expects at least 2 arguments: channel name and data.');

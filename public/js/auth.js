@@ -1,5 +1,6 @@
 "use strict";
 import CM from './ChannelManager.js';
+const log = console.log;
 
 let User;
 
@@ -12,13 +13,21 @@ CM.setFormat('register-user', {
 });
 CM.listen('register-user', signUp);
 
+CM.setFormat('sign-in', {
+  username: 'STRING',
+  password: 'STRING',
+});
 CM.listen('sign-in', signIn);
-CM.listen('sign-in-by-token', signInByToken);
-CM.listen('signed-user', getCurrentUser);
 
 // Establish connection with Drawer module
-CM.openChannel('report-validity');
-CM.openChannel('draw-user-elements');
+CM.open('report-validity');
+CM.open('draw-user-elements');
+
+// Establish connection with Cart module
+CM.open('activate-cart');
+
+// Try to sign user in if valid token is present in local storage
+signInByToken();
 
 function signUp(data) {
   const username = data.username.trim();
@@ -87,27 +96,21 @@ function signUp(data) {
 
           User = username;
 
-          // 3. Give visual indication of successful authentication
-          CM.send('draw-user-elements', username);
-          fillUserBox(username);
+          // 3. Get user cart and make it active
+          CM.send('activate-cart', username);
 
-          // 4. Fill cart and display it
-          Cart = getCart(username);
-          updateCart();
-          displayCart();
+          // 4. Give visual indication of successful authentication
+          CM.send('draw-user-elements', username);
         })
         .catch((error) => log('Error signing user in: ', error.message))
     }).catch((error) => log('Error registering new user: ', error.message))
 }
 
-function signIn(ev) {
-  ev.preventDefault();
+function signIn(data) {
+  const username = data.username.trim();
+  const password = data.password.trim();
 
-  const formData = new FormData(ev.target);
-  const username = formData.get('username').trim();
-  const password = formData.get('password').trim();
-
-  const data = {
+  const reqData = {
     username,
     password
   }
@@ -119,7 +122,7 @@ function signIn(ev) {
     method: 'POST',
     headers,
     mode: 'same-origin',
-    body: JSON.stringify(data)
+    body: JSON.stringify(reqData)
   })
 
   sendSignInRequest(request, username)
@@ -134,59 +137,29 @@ function signIn(ev) {
 
       User = username;
 
-      // 3. Give visual indication of successful authentication
-      fillUserBox(username);
+      // 3. Get user cart and make it active
+      CM.send('activate-cart', username);
 
-      // 4. Fill cart and display it
-      Cart = getCart(username);
-      updateCart();
-      displayCart();
+      // 4. Give visual indication of successful authentication
+      CM.send('draw-user-elements', username);
     })
     .catch((error) => {
-      const userInput = document.getElementById('username');
-      const passInput = document.getElementById('password');
-
-      if (error.message == 'Password is not correct.') {
-        passInput.setCustomValidity(error.message);
-        passInput.reportValidity();
-      } else {
-        userInput.setCustomValidity(error.message);
-        userInput.reportValidity();
-      }
+      CM.send('report-validity', {
+        target: error.target,
+        message: error.message
+      })
 
       log('Error signing user in: ', error.message);
     })
 }
 
-function sendSignInRequest(request, username) {
-  return new Promise((resolve, reject) => {
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          return response.text();
-        } else {
-          return response.text().then((message) => {
-            throw new Error(message);
-          })
-        }
-      }).then((token) => {
-        // 1. Verify that token is a string
-        if (typeof token !== 'string') {
-          throw new Error('Token came from server is not of "string" type.');
-          return;
-        }
-
-        resolve(token);
-      }).catch((error) => {
-        reject(error);
-      })
-  })
-}
-
 function signInByToken() {
   const token = localStorage.getItem('token');
 
-  if (!token) return;
+  if (!token) {
+    log('Authentication token is not present in local storage.');
+    return;
+  }
 
   // 1. Send token to the server
   const headers = new Headers();
@@ -214,14 +187,38 @@ function signInByToken() {
       // 3. Set current user
       User = username;
 
-      // 3. Give visual indication of successful authentication
-      fillUserBox(username);
+      // 4. Set user cart as active
+      CM.send('activate-cart', username);
 
-      // 4. Get, fill and display cart
-      Cart = getCart(username);
-      updateCart();
-      displayCart();
+      // 5. Give visual indication of successful authentication
+      CM.send('draw-user-elements', username);
     }).catch((error) => log('Token is not valid or expired. Refused to authenticate automatically.'))
+}
+
+function sendSignInRequest(request, username) {
+  return new Promise((resolve, reject) => {
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          return response.text();
+        } else {
+          return response.json().then((errorObj) => {
+            reject(errorObj);
+          })
+        }
+      }).then((token) => {
+        if (token) {
+          // 1. Verify that token is a string
+          if (typeof token !== 'string') {
+            reject('Token came from server is not of "string" type.');
+          }
+
+          resolve(token);
+        } else {
+          reject();
+        }
+      })
+  })
 }
 
 function getCurrentUser() {
