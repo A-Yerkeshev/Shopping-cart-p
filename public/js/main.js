@@ -1,7 +1,8 @@
 "use strict";
 import Router from './router.js';
-import fillTemplate from './fillTemplate.js'
-import { getCookie, setCookie } from './cookies.js'
+import fillTemplate from './fillTemplate.js';
+import { getCookie, setCookie } from './cookies.js';
+import CM from './ChannelManager.js';
 
 const log = console.log;
 
@@ -20,7 +21,7 @@ const expDays = 5;
 const Data = {
   items: null
 }
-let user, cart;
+let User, Cart;
 
 Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
@@ -38,6 +39,15 @@ Router.onload('payment-cancel', () => {
 });
 Router.default('/');
 
+// Establish connection with Auth module
+CM.openChannel('register-user');
+CM.openChannel('sign-in');
+CM.openChannel('sign-in-by-token');
+CM.openChannel('signed-user');
+
+// Establish connection with Cart module
+// Establish connection with Drawer module
+
 // Fetch items from the server
 fetchItems();
 
@@ -50,15 +60,11 @@ signInByToken();
 
 addCloseDescriptionListener();
 
-// Add new item indicator to cart button if cart is not empty
-initialIndicator();
-
 function updateCart() {
-  const cart = getCookie('cart');
   const items = [];
 
-  if (cart) {
-    cart.forEach((entry) => {
+  if (Cart) {
+    Cart.forEach((entry) => {
       let item;
 
       // Find item by id
@@ -98,75 +104,62 @@ function updateCart() {
 
 function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
-  let cart = getCookie('cart');
 
   // 1. If user is not signed in - redirect to login page
-  if (!user) {
+  if (!User) {
     location.href = '/#sign-in';
     return;
   }
 
-  // 2. If cart cookie was found:
-  if (cart) {
-    // 3. Check if selected item already present in the cart
-    let match;
+  // 2. Check if selected item already present in the cart
+  let match;
 
-    for (let i=0; i<(cart.length); i++) {
-      if (cart[i].id == itemId) {
-        match = cart[i];
+  for (let i=0; i<(Cart.length); i++) {
+    if (Cart[i].id == itemId) {
+      match = Cart[i];
 
-        break;
-      }
+      break;
     }
+  }
 
-    if (match) {
-      // 3.1 If it is, check what triggered addToCart function
-      if (ev.target.value) {
-        // 3.1.1 If it was triggered by input field - set new quantity
-        match.quantity = ev.target.value;
-      } else {
-        // 3.1.2 If it was triggered by button - increase quantity by 1
-        match.quantity++;
-
-        // 3.1.3 Add visual indetification of new item
-        cartToggle.classList.add('new');
-      }
+  if (match) {
+    // 2.1 If it is, check what triggered addToCart function
+    if (ev.target.value) {
+      // 2.1.1 If it was triggered by input field - set new quantity
+      match.quantity = ev.target.value;
     } else {
-      // 3.2 Otherwise add new entry to cart
-      cart.push({
-        id: itemId,
-        quantity: 1
-      })
+      // 2.1.2 If it was triggered by button - increase quantity by 1
+      match.quantity++;
 
+      // 2.1.3 Add visual indetification of new item
       cartToggle.classList.add('new');
     }
   } else {
-    // 4. Otherwise create cart and add frist item
-    cart = [{
+    // 3.2 Otherwise add new entry to cart
+    Cart.push({
       id: itemId,
       quantity: 1
-    }]
+    })
 
     cartToggle.classList.add('new');
   }
 
-  // 5. Update cart cookie
-  setCookie('cart', cart, 1000*60*60*24*expDays);
+  // 5. Update cart cookie and make current cart active
+  setCookie(`cart-${User}`, Cart, 1000*60*60*24*expDays);
   updateCart();
 }
 
 function removeFromCart(ev) {
   const itemId = ev.target.parentNode.getAttribute('data-id');
-  let cart = getCookie('cart');
 
-  for (let i=0; i<(cart.length); i++) {
-    if (cart[i].id == itemId) {
-      cart.splice(i, 1);
+  for (let i=0; i<(Cart.length); i++) {
+    if (Cart[i].id == itemId) {
+      Cart.splice(i, 1);
       break;
     }
   }
 
-  setCookie('cart', cart, 1000*60*60*24*expDays);
+  setCookie(`cart-${User}`, Cart, 1000*60*60*24*expDays);
   updateCart();
 }
 
@@ -180,6 +173,9 @@ function toggleCart(ev) {
 function displayCart() {
   cartView.classList.add('visible');
   cartToggle.classList.add('visible');
+
+  // Add new item indicator to cart button if cart is not empty
+  initialIndicator();
 }
 
 function fillStoreTemplate() {
@@ -379,6 +375,25 @@ function signUp(ev) {
       })
 
       sendSignInRequest(request, username)
+        .then((token) => {
+          log(`User successfully signed in.`);
+
+          // 1. Save token in local storage
+          localStorage.setItem('token', token);
+
+          // 2. Redirect to homepage
+          location.href = '/#';
+
+          User = username;
+
+          // 3. Give visual indication of successful authentication
+          fillUserBox(username);
+
+          // 4. Fill cart and display it
+          Cart = getCart(username);
+          updateCart();
+          displayCart();
+        })
         .catch((error) => log('Error signing user in: ', error.message))
     }).catch((error) => log('Error registering new user: ', error.message))
 }
@@ -406,6 +421,25 @@ function signIn(ev) {
   })
 
   sendSignInRequest(request, username)
+    .then((token) => {
+      log(`User successfully signed in.`);
+
+      // 1. Save token in local storage
+      localStorage.setItem('token', token);
+
+      // 2. Redirect to homepage
+      location.href = '/#';
+
+      User = username;
+
+      // 3. Give visual indication of successful authentication
+      fillUserBox(username);
+
+      // 4. Fill cart and display it
+      Cart = getCart(username);
+      updateCart();
+      displayCart();
+    })
     .catch((error) => {
       const userInput = document.getElementById('username');
       const passInput = document.getElementById('password');
@@ -434,29 +468,13 @@ function sendSignInRequest(request, username) {
           })
         }
       }).then((token) => {
-        log(`User successfully signed in.`);
-
         // 1. Verify that token is a string
         if (typeof token !== 'string') {
           throw new Error('Token came from server is not of "string" type.');
           return;
         }
 
-        // 2. Save token in local storage
-        localStorage.setItem('token', token);
-
-        // 3. Redirect to homepage
-        location.href = '/#';
-
-        user = username;
-
-        // 4. Give visual indication of successful authentication
-        fillUserBox(username);
-
-        // 5. Display cart
-        displayCart();
-
-        resolve();
+        resolve(token);
       }).catch((error) => {
         reject(error);
       })
@@ -497,12 +515,14 @@ function signInByToken() {
       if (!username) return;
 
       // 3. Set current user
-      user = username;
+      User = username;
 
       // 3. Give visual indication of successful authentication
       fillUserBox(username);
 
-      // 4. Display cart
+      // 4. Get, fill and display cart
+      Cart = getCart(username);
+      updateCart();
       displayCart();
     }).catch((error) => log('Token is not valid or expired. Refused to authenticate automatically.'))
 }
@@ -517,9 +537,7 @@ function addCloseDescriptionListener() {
 }
 
 function initialIndicator() {
-  const cart = getCookie('cart');
-
-  if (cart.length > 0) {
+  if (Cart.length > 0) {
     cartToggle.classList.add('new');
   }
 }
@@ -543,17 +561,16 @@ function initStripe() {
 
 function checkout() {
   // 1. Verify that user is signed in
-  if (!user) {
+  if (!User) {
     location.href = '/#sign-in';
     return;
   }
 
-  // 2. Get cart and auth token
-  const cart = getCookie('cart');
+  // 2. Auth token
   const token = localStorage.getItem('token');
 
-  if (!cart) {
-    throw new Error(`Something went wrong. Cart is ${cart}.`);
+  if (!Cart) {
+    throw new Error(`Cart is not present.`);
     return;
   }
 
@@ -563,7 +580,7 @@ function checkout() {
   }
 
   // 3. Add item name and price to cart items for verification on server side
-  cart.forEach((item) => {
+  Cart.forEach((item) => {
     let match = false;
 
     for (let i=0; i<(Data.items.length); i++) {
@@ -588,7 +605,7 @@ function checkout() {
   const total = Math.round(parseFloat(totalString)*100);
 
   const data = {
-    cart,
+    cart: Cart,
     token,
     total
   }
@@ -619,6 +636,8 @@ function checkout() {
       if (result.error) {
         alert(result.error.message);
       }
+
+      clearCart();
     })
     .catch((error) => {
       log('Error proceeding to payment: ', error.message);
@@ -626,5 +645,20 @@ function checkout() {
 }
 
 function clearCart() {
-  setCookie('cart', [], 1000*60*60*24*expDays);
+  if (User) {
+    setCookie(`cart-${User}`, [], 1000*60*60*24*expDays);
+  }
+}
+
+function getCart(username) {
+  // 1. Check if account has associated cart
+  const cart = getCookie(`cart-${username}`);
+
+  // 2. If it does - return in, otherwise - create new cart
+  if (cart && Array.isArray(cart)) {
+    return cart;
+  } else {
+    setCookie(`cart-${username}`, [], 1000*60*60*24*expDays);
+    return [];
+  }
 }
