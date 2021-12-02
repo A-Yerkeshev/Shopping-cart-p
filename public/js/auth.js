@@ -5,19 +5,8 @@ const log = console.log;
 let User;
 
 // Listen to requests from Main module
-CM.setFormat('register-user', {
-  username: 'STRING',
-  email: 'STRING',
-  password: 'STRING',
-  passwordRep: 'STRING'
-});
-CM.listen('register-user', signUp);
-
-CM.setFormat('sign-in', {
-  username: 'STRING',
-  password: 'STRING',
-});
-CM.listen('sign-in', signIn);
+CM.listen('add-sign-up-el', addSignUpEventListeners);
+CM.listen('add-sign-in-el', addSignInEventListeners);
 
 // Establish connection with Drawer module
 CM.open('report-validity');
@@ -26,14 +15,21 @@ CM.open('draw-user-elements');
 // Establish connection with Cart module
 CM.open('activate-cart');
 
+CM.open('get-user');
+CM.open('send-user');
+CM.listen('get-user', sendUser);
+
 // Try to sign user in if valid token is present in local storage
 signInByToken();
 
-function signUp(data) {
-  const username = data.username.trim();
-  const email = data.email.trim();
-  const password = data.password.trim();
-  const passwordRep = data.passwordRep.trim();
+function signUp(ev) {
+  ev.preventDefault();
+
+  const formData = new FormData(ev.target);
+  const username = formData.get('username').trim();
+  const email = formData.get('email').trim();
+  const password = formData.get('password').trim();
+  const passwordRep = formData.get('password-rep');
 
   // 1. Validate passwords match
   if (password !== passwordRep) {
@@ -106,11 +102,14 @@ function signUp(data) {
     }).catch((error) => log('Error registering new user: ', error.message))
 }
 
-function signIn(data) {
-  const username = data.username.trim();
-  const password = data.password.trim();
+function signIn(ev) {
+  ev.preventDefault();
 
-  const reqData = {
+  const formData = new FormData(ev.target);
+  const username = formData.get('username').trim();
+  const password = formData.get('password').trim();
+
+  const data = {
     username,
     password
   }
@@ -122,7 +121,7 @@ function signIn(data) {
     method: 'POST',
     headers,
     mode: 'same-origin',
-    body: JSON.stringify(reqData)
+    body: JSON.stringify(data)
   })
 
   sendSignInRequest(request, username)
@@ -144,12 +143,14 @@ function signIn(data) {
       CM.send('draw-user-elements', username);
     })
     .catch((error) => {
-      CM.send('report-validity', {
-        target: error.target,
-        message: error.message
-      })
-
-      log('Error signing user in: ', error.message);
+      if (error.hasOwnProperty('target')) {
+        CM.send('report-validity', {
+          target: error.target,
+          message: error.message
+        })
+      } else {
+        console.error('Error signing user in: ', error.message);
+      }
     })
 }
 
@@ -192,7 +193,10 @@ function signInByToken() {
 
       // 5. Give visual indication of successful authentication
       CM.send('draw-user-elements', username);
-    }).catch((error) => log('Token is not valid or expired. Refused to authenticate automatically.'))
+    }).catch((error) => {
+      log(error.stack)
+      log('Token is not valid or expired. Refused to authenticate automatically.');
+    })
 }
 
 function sendSignInRequest(request, username) {
@@ -221,6 +225,62 @@ function sendSignInRequest(request, username) {
   })
 }
 
-function getCurrentUser() {
-  return User;
+function addSignUpEventListeners() {
+  const form = document.querySelector('.form form');
+  const inputs = [];
+
+  form.addEventListener('submit', signUp);
+
+  // 1. Change default pattern mismatch message for input and email fields
+  const userInput = form.querySelector('#username');
+  const emailInput = form.querySelector('#email');
+  const passInput = form.querySelector('#password');
+  const passRepInput = form.querySelector('#password-rep');
+
+  if (userInput) inputs.push(userInput);
+  if (emailInput) inputs.push(emailInput);
+  if (passInput) inputs.push(passInput);
+  if (passRepInput) inputs.push(passRepInput);
+
+  userInput.addEventListener('invalid', () => {
+    patternMismatchMessage(userInput, 'Only A-Z, a-z, 0-9 and _ are allowed.');
+  })
+
+  emailInput.addEventListener('invalid', () => {
+    patternMismatchMessage(userInput, 'Email format is invalid.');
+  })
+
+  passInput.addEventListener('invalid', () => {
+    patternMismatchMessage(passInput, 'Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.');
+  })
+
+  // 2. Clear validation messages on input value change
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      input.setCustomValidity('');
+    })
+  })
+}
+
+function addSignInEventListeners() {
+  const form = document.querySelector('.form form');
+  const inputs = form.querySelectorAll('input');
+
+  form.addEventListener('submit', signIn);
+
+  inputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      input.setCustomValidity('');
+    })
+  })
+}
+
+function patternMismatchMessage(input, message) {
+  if (input.validity.patternMismatch) {
+    input.setCustomValidity(message);
+  }
+}
+
+function sendUser() {
+  CM.send('send-user', User);
 }

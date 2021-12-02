@@ -37,140 +37,26 @@ Router.onload('payment-cancel', () => {
 Router.default('/');
 
 // Establish connection with Auth module
-CM.open('register-user');
-CM.open('sign-in');
-CM.open('sign-in-by-token');
+CM.open('add-sign-up-el');
+CM.open('add-sign-in-el');
 
 // Establish connection with Cart module
+CM.open('add-store-el');
+CM.open('clear-cart');
+
 // Establish connection with Drawer module
+CM.open('cart-layout-updated');
+
+CM.open('get-items');
+CM.open('send-items');
+CM.setFormat('send-items', 'ARRAY');
+CM.listen('get-items', sendItems);
 
 // Fetch items from the server
 fetchItems();
 
 // Initialize stripe
 initStripe();
-
-
-
-addCloseDescriptionListener();
-
-function updateCart() {
-  const items = [];
-
-  if (Cart) {
-    Cart.forEach((entry) => {
-      let item;
-
-      // Find item by id
-      for (let i=0; i<(Data.items.length); i++) {
-        if (Data.items[i].id == entry.id) {
-          item = {
-            id: Data.items[i].id,
-            name: Data.items[i].name,
-            image: Data.items[i].image,
-            price: Data.items[i].price,
-            displayPrice: ((Data.items[i].price)/100).toFixed(2),
-            quantity: entry.quantity
-          }
-          break;
-        }
-      }
-
-      if (item) {
-        items.push(item);
-      }
-    })
-  }
-
-  const total = items.reduce((prev, curr) => {
-    return prev + curr.price*curr.quantity;
-  }, 0)/100
-
-  const data = {
-    items,
-    total: total.toFixed(2)
-  }
-
-  cartView.innerHTML = '';
-  cartView.appendChild(fillTemplate(cartTpl, data));
-  addCartEventListeners();
-}
-
-function addToCart(ev) {
-  const itemId = ev.target.getAttribute('data-id');
-
-  // 1. If user is not signed in - redirect to login page
-  if (!User) {
-    location.href = '/#sign-in';
-    return;
-  }
-
-  // 2. Check if selected item already present in the cart
-  let match;
-
-  for (let i=0; i<(Cart.length); i++) {
-    if (Cart[i].id == itemId) {
-      match = Cart[i];
-
-      break;
-    }
-  }
-
-  if (match) {
-    // 2.1 If it is, check what triggered addToCart function
-    if (ev.target.value) {
-      // 2.1.1 If it was triggered by input field - set new quantity
-      match.quantity = ev.target.value;
-    } else {
-      // 2.1.2 If it was triggered by button - increase quantity by 1
-      match.quantity++;
-
-      // 2.1.3 Add visual indetification of new item
-      cartToggle.classList.add('new');
-    }
-  } else {
-    // 3.2 Otherwise add new entry to cart
-    Cart.push({
-      id: itemId,
-      quantity: 1
-    })
-
-    cartToggle.classList.add('new');
-  }
-
-  // 5. Update cart cookie and make current cart active
-  setCookie(`cart-${User}`, Cart, 1000*60*60*24*expDays);
-  updateCart();
-}
-
-function removeFromCart(ev) {
-  const itemId = ev.target.parentNode.getAttribute('data-id');
-
-  for (let i=0; i<(Cart.length); i++) {
-    if (Cart[i].id == itemId) {
-      Cart.splice(i, 1);
-      break;
-    }
-  }
-
-  setCookie(`cart-${User}`, Cart, 1000*60*60*24*expDays);
-  updateCart();
-}
-
-function toggleCart(ev) {
-  cartView.classList.toggle('onscreen');
-  cartToggle.classList.toggle('onscreen');
-
-  cartToggle.classList.remove('new');
-}
-
-function displayCart() {
-  cartView.classList.add('visible');
-  cartToggle.classList.add('visible');
-
-  // Add new item indicator to cart button if cart is not empty
-  initialIndicator();
-}
 
 function fillStoreTemplate() {
   if (Data.items) {
@@ -210,85 +96,15 @@ function fillStoreTemplate() {
 }
 
 function addStoreEventListeners() {
-  const buttons = Array.from(document.getElementsByClassName('add'));
-
-  buttons.forEach((button) => {
-    button.addEventListener('click', addToCart);
-  })
-}
-
-function addCartEventListeners() {
-  const buttons = Array.from(document.getElementsByClassName('remove'));
-  const inputs = Array.from(document.getElementsByClassName('quantity'));
-  const pay = document.getElementsByClassName('pay')[0];
-
-  cartToggle.addEventListener('click', toggleCart);
-
-  buttons.forEach((button) => {
-    button.addEventListener('click', removeFromCart);
-  })
-
-  inputs.forEach((input) => {
-    input.addEventListener('change', addToCart);
-  })
-
-  pay.addEventListener('click', checkout);
+  CM.send('add-store-el', true);
 }
 
 function addSignUpEventListeners() {
-  const form = document.querySelector('.form form');
-  const inputs = [];
-
-  form.addEventListener('submit', signUp);
-
-  // 1. Change default pattern mismatch message for input and email fields
-  const userInput = form.querySelector('#username');
-  const emailInput = form.querySelector('#email');
-  const passInput = form.querySelector('#password');
-  const passRepInput = form.querySelector('#password-rep');
-
-  if (userInput) inputs.push(userInput);
-  if (emailInput) inputs.push(emailInput);
-  if (passInput) inputs.push(passInput);
-  if (passRepInput) inputs.push(passRepInput);
-
-  userInput.addEventListener('invalid', () => {
-    patternMismatchMessage(userInput, 'Only A-Z, a-z, 0-9 and _ are allowed.');
-  })
-
-  emailInput.addEventListener('invalid', () => {
-    patternMismatchMessage(userInput, 'Email format is invalid.');
-  })
-
-  passInput.addEventListener('invalid', () => {
-    patternMismatchMessage(passInput, 'Only A-Z, a-z, 0-9 , _ - @ $ * # + are allowed.');
-  })
-
-  // 2. Clear validation messages on input value change
-  inputs.forEach((input) => {
-    input.addEventListener('input', () => {
-      input.setCustomValidity('');
-    })
-  })
+  CM.send('add-sign-up-el', true);
 }
 
 function addSignInEventListeners() {
-  const form = document.querySelector('.form form');
-  const inputs = form.querySelectorAll('input');
-
-  form.addEventListener('submit', signIn);
-
-  inputs.forEach((input) => {
-    input.addEventListener('input', () => {
-      input.setCustomValidity('');
-    })
-  })
-}
-
-function patternMismatchMessage(input, message) {
-  if (input.validity.patternMismatch) {
-    input.setCustomValidity(message);
-  }
+  CM.send('add-sign-in-el', true);
 }
 
 function fetchItems() {
@@ -296,65 +112,12 @@ function fetchItems() {
     .then((response) => response.json())
     .then((data) => {
       Data.items = data;
-      updateCart();
       return data;
     })
     .catch((error) => log('Error fetching data from /products: ' + error));
 }
 
-function signUp(ev) {
-  ev.preventDefault();
-
-  const formData = new FormData(ev.target);
-  const username = formData.get('username').trim();
-  const email = formData.get('email').trim();
-  const password = formData.get('password').trim();
-  const passwordRep = formData.get('password-rep');
-
-  const data = {
-    username,
-    email,
-    password,
-    passwordRep
-  }
-
-  CM.send('register-user', data);
-}
-
-function signIn(ev) {
-  ev.preventDefault();
-
-  const formData = new FormData(ev.target);
-  const username = formData.get('username').trim();
-  const password = formData.get('password').trim();
-
-  const data = {
-    username,
-    password
-  }
-
-  CM.send('sign-in', data);
-}
-
-function fillUserBox(username) {
-  const userbox = document.getElementById('userbox');
-  userbox.textContent = `Signed as ${username}`;
-}
-
-function addCloseDescriptionListener() {
-  const descr = document.getElementsByClassName('descr')[0];
-  const close = descr.querySelector('.fa-times');
-
-  close.addEventListener('click', () => {
-    descr.remove();
-  })
-}
-
-function initialIndicator() {
-  if (Cart.length > 0) {
-    cartToggle.classList.add('new');
-  }
-}
+////////////////////////
 
 function initStripe() {
   // 1. Get stripe public key from the server
@@ -459,20 +222,10 @@ function checkout() {
 }
 
 function clearCart() {
-  if (User) {
-    setCookie(`cart-${User}`, [], 1000*60*60*24*expDays);
-  }
+  CM.send('clear-cart', true);
 }
+////////////////
 
-function getCart(username) {
-  // 1. Check if account has associated cart
-  const cart = getCookie(`cart-${username}`);
-
-  // 2. If it does - return in, otherwise - create new cart
-  if (cart && Array.isArray(cart)) {
-    return cart;
-  } else {
-    setCookie(`cart-${username}`, [], 1000*60*60*24*expDays);
-    return [];
-  }
+function sendItems(req) {
+  CM.send('send-items', Data.items);
 }

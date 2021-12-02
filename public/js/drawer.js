@@ -26,13 +26,10 @@ CM.listen('draw-user-elements', fillUserBox, displayCart);
 CM.setFormat('draw-cart-items', 'ARRAY');
 CM.listen('draw-cart-items', drawCartItems);
 
-// Inform other modules when cart layout has been updated
-CM.open('cart-layout-updated');
-CM.setFormat('cart-layout-updated', {
-  buttons: 'ARRAY',
-  inputs: 'ARRAY',
-  payBtn: 'OBJECT'
-})
+CM.listen('add-cart-indicator', addIndicator);
+
+cartToggle.addEventListener('click', toggleCart);
+addCloseDescriptionListener();
 
 function reportValidity(data) {
   const input = document.getElementById(`${data.target}`);
@@ -67,17 +64,75 @@ function patternMismatchMessage(input, message) {
   }
 }
 
-function drawCartItems(items) {
+function drawCartItems(cartEntries) {
+  const itemsData = getItems();
+  let items = [];
+
+  cartEntries.forEach((entry) => {
+    let item;
+
+    // Find item by id
+    for (let i=0; i<(itemsData.length); i++) {
+      if (itemsData[i].id == entry.id) {
+        item = {
+          id: itemsData[i].id,
+          name: itemsData[i].name,
+          image: itemsData[i].image,
+          price: itemsData[i].price,
+          displayPrice: ((itemsData[i].price)/100).toFixed(2),
+          quantity: entry.quantity
+        }
+        break;
+      }
+    }
+
+    if (item) {
+      items.push(item);
+    }
+  })
+
+  const total = items.reduce((prev, curr) => {
+    return prev + curr.price*curr.quantity;
+  }, 0)/100
+
+  const data = {
+    items,
+    total: total.toFixed(2)
+  }
+
   cartView.innerHTML = '';
-  cartView.appendChild(fillTemplate(cartTpl, items));
+  cartView.appendChild(fillTemplate(cartTpl, data));
 
-  const buttons = Array.from(document.getElementsByClassName('remove'));
-  const inputs = Array.from(document.getElementsByClassName('quantity'));
-  const payBtn = document.getElementsByClassName('pay')[0];
-
-  CM.send('cart-layout-updated', {
-    buttons,
-    inputs,
-    payBtn
-  });
+  // Inform other modules that cart layout has been updated
+  CM.send('cart-layout-updated', true);
 }
+
+function addIndicator() {
+  cartToggle.classList.add('new');
+}
+
+function toggleCart() {
+  cartToggle.classList.toggle('onscreen');
+  cartView.classList.toggle('onscreen');
+}
+
+function getItems() {
+  let items;
+
+  CM.listenOnce('send-items', (data) => {
+    items = data;
+  })
+  CM.send('get-items', true);
+
+  return items;
+}
+
+function addCloseDescriptionListener() {
+  const descr = document.getElementsByClassName('descr')[0];
+  const close = descr.querySelector('.fa-times');
+
+  close.addEventListener('click', () => {
+    descr.remove();
+  })
+}
+
