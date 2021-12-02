@@ -75,8 +75,6 @@ function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
   const user = getUser();
 
-  log(user);
-
   // 1. If user is not signed in - redirect to login page
   if (!user) {
     location.href = '/#sign-in';
@@ -123,6 +121,7 @@ function addToCart(ev) {
 
 function removeFromCart(ev) {
   const itemId = ev.target.parentNode.getAttribute('data-id');
+  const user = getUser();
 
   for (let i=0; i<(Cart.length); i++) {
     if (Cart[i].id == itemId) {
@@ -131,7 +130,7 @@ function removeFromCart(ev) {
     }
   }
 
-  setCookie(`cart-${User}`, Cart, 1000*60*60*24*expDays);
+  setCookie(`cart-${user}`, Cart, 1000*60*60*24*expDays);
   CM.send('draw-cart-items', Cart);
 }
 

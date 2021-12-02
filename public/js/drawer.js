@@ -114,6 +114,7 @@ function addIndicator() {
 function toggleCart() {
   cartToggle.classList.toggle('onscreen');
   cartView.classList.toggle('onscreen');
+  cartToggle.classList.remove('new');
 }
 
 function getItems() {
