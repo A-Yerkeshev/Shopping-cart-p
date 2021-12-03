@@ -158,7 +158,7 @@ function signInByToken() {
   const token = localStorage.getItem('token');
 
   if (!token) {
-    log('Authentication token is not present in local storage.');
+    console.error('Authentication token is not present in local storage.');
     return;
   }
 

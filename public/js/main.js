@@ -11,6 +11,7 @@ const signUpTpl = document.getElementById('sign-up-template');
 const signInTpl = document.getElementById('sign-in-template');
 const paymentSuccessTpl = document.getElementById('payment-success-template');
 const paymentCancelTpl = document.getElementById('payment-cancel-template');
+const ordersTpl = document.getElementById('orders-template');
 
 const Data = {
   items: null
@@ -30,6 +31,7 @@ Router.when('payment-cancel', paymentCancelTpl.content);
 Router.onload('payment-cancel', () => {
   setTimeout(() => Router.redirect('/'), 3000)
 });
+Router.when('orders', fillOrdersTemplate);
 Router.default('/');
 
 // Establish connection with Auth module
@@ -83,6 +85,8 @@ function fillStoreTemplate() {
           })
 
           resolve(fillTemplate(store, { items }));
+        }).catch((error) => {
+          reject(error);
         })
     })
   }
@@ -107,7 +111,7 @@ function fetchItems() {
       Data.items = data;
       return data;
     })
-    .catch((error) => log('Error fetching data from /products: ' + error));
+    .catch((error) => console.error('Error fetching data from /products: ' + error));
 }
 
 function clearCart() {
@@ -116,4 +120,38 @@ function clearCart() {
 
 function sendItems(req) {
   CM.send('send-items', Data.items);
+}
+
+function fillOrdersTemplate() {
+  return new Promise((resolve, reject) => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.error('Authentication token is not present in local storage.');
+      return;
+    }
+
+    const request = new Request(`/orders?token=${token}`, {
+      method: 'GET',
+      mode: 'same-origin'
+    })
+
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return response.text().then((message) => {
+            throw new Error(message);
+          })
+        }
+      }).then((orders) => {
+
+        let data = {message: JSON.stringify(orders, null, 2)};
+
+        resolve(fillTemplate(ordersTpl, data));
+      }).catch((error) => {
+        reject(error);
+      })
+  })
 }

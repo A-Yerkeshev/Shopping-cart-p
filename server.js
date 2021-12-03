@@ -381,16 +381,57 @@ app.get('/users/auth/token', async (request, response) => {
   }
 })
 
-// Temporary route to get all users from database
-app.get('/users', (request, response) => {
-  client.query('SELECT * from users', (error, data) => {
-    if (error) {
-      log('Database query error: ', error.stack);
-      response.status(500).send('Error occured when attempting to get users.');
+// List customer's orders
+app.get('/orders', async (request, response) => {
+  const token = request.query.token;
+
+  try {
+    // 1. Extract email from token
+    const payload = jwt.verify(token, jwtkey);
+    const email = payload.email;
+
+    // 2. Fetch checkout sessions from Stripe server
+    if (email) {
+      let sessions = await stripe.checkout.sessions.list();
+      sessions = sessions.data;
+
+      // 3. Leave only sessions for given user
+      sessions = sessions.filter((session) => {
+        return session.customer_email === email;
+      })
+
+      // 4. Retrieve list items for every session
+      const orders = await Promise.all(sessions.map(async (session) => {
+        let items = await stripe.checkout.sessions.listLineItems(session.id);
+        items = items.data;
+
+        // 5. Retrieve product name for every item in the order
+        const order = await Promise.all(items.map(async (item) => {
+          const product = await stripe.products.retrieve(item.price.product);
+          const productName = product.name;
+
+          // 6. Bundle up price, product and quantity data for every item and push to order array
+          const itemData = {
+            price: item.price.unit_amount,
+            product: productName,
+            total: item.amount_total,
+            quantity: item.quantity
+          }
+
+          return itemData;
+        }))
+
+        return order;
+      }));
+
+      response.status(200).send(orders);
     } else {
-      response.status(200).send(data.rows);
+      throw new Error('User email is not present in the token.');
     }
-  })
+  } catch (error) {
+    response.status(401).send(error.message);
+  }
+
 })
 
 function getUser(username) {

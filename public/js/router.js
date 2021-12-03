@@ -191,6 +191,12 @@ function stripUrl(url) {
     url = url.substring(1);
   }
 
+  const index = url.indexOf('?');
+
+  if (index > -1) {
+    url = url.substring(index);
+  }
+
   return url;
 }
 
