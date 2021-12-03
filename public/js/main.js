@@ -9,16 +9,12 @@ const log = console.log;
 const store = document.getElementById('store-template');
 const signUpTpl = document.getElementById('sign-up-template');
 const signInTpl = document.getElementById('sign-in-template');
-const cartTpl = document.getElementById('cart-template');
-const cartView = document.getElementById('cart');
-const cartToggle = document.getElementById('cart-toggle');
 const paymentSuccessTpl = document.getElementById('payment-success-template');
 const paymentCancelTpl = document.getElementById('payment-cancel-template');
 
 const Data = {
   items: null
 }
-let stripe, User, Cart;
 
 Router.when('/', fillStoreTemplate);
 Router.onload('/', addStoreEventListeners);
@@ -54,9 +50,6 @@ CM.listen('get-items', sendItems);
 
 // Fetch items from the server
 fetchItems();
-
-// Initialize stripe
-initStripe();
 
 function fillStoreTemplate() {
   if (Data.items) {
@@ -117,114 +110,9 @@ function fetchItems() {
     .catch((error) => log('Error fetching data from /products: ' + error));
 }
 
-////////////////////////
-
-function initStripe() {
-  // 1. Get stripe public key from the server
-  fetch('/stripe-pkey')
-    .then((response) => response.text())
-    .then((key) => {
-      if (!key) {
-        throw new Error('Invalid value for Stripe public key.');
-        return;
-      }
-
-      // 2. Activate Stripe using public key
-      stripe = Stripe(key);
-    }).catch((error) => {
-      log('Error fetching Stripe public key.', error);
-    })
-}
-
-function checkout() {
-  // 1. Verify that user is signed in
-  if (!User) {
-    location.href = '/#sign-in';
-    return;
-  }
-
-  // 2. Auth token
-  const token = localStorage.getItem('token');
-
-  if (!Cart) {
-    throw new Error(`Cart is not present.`);
-    return;
-  }
-
-  if (!token) {
-    throw new Error(`No authentication token is present in local storage.`);
-    return;
-  }
-
-  // 3. Add item name and price to cart items for verification on server side
-  Cart.forEach((item) => {
-    let match = false;
-
-    for (let i=0; i<(Data.items.length); i++) {
-      if (Data.items[i].id == item.id) {
-        item.name = Data.items[i].name;
-        item.price = Data.items[i].price;
-
-        match = true;
-        break;
-      }
-    }
-
-    if (match == false) {
-      throw new Error(`Item with invalid id ${item.id} is present in the cart cookie.`);
-      return;
-    }
-  })
-
-  // 4. Get total price that was displayed to the user
-  const totalText = document.querySelector('b.total').textContent;
-  const totalString = totalText.substring(totalText.indexOf('$')+1).trim();
-  const total = Math.round(parseFloat(totalString)*100);
-
-  const data = {
-    cart: Cart,
-    token,
-    total
-  }
-
-  // 5. Create request
-  const headers = new Headers();
-  headers.append('Content-Type', 'application/json');
-
-  const request = new Request('/create-checkout-session', {
-    method: 'POST',
-    headers,
-    mode: 'same-origin',
-    body: JSON.stringify(data)
-  })
-
-  fetch(request)
-    .then(response => {
-      if (response.ok) {
-        return response.text();
-      } else {
-        return response.text().then((message) => {
-          throw new Error(message);
-        })
-      }
-    }).then((sessionId) => {
-      return stripe.redirectToCheckout({ sessionId });
-    }).then((result) => {
-      if (result.error) {
-        alert(result.error.message);
-      }
-
-      clearCart();
-    })
-    .catch((error) => {
-      log('Error proceeding to payment: ', error.message);
-    })
-}
-
 function clearCart() {
   CM.send('clear-cart', true);
 }
-////////////////
 
 function sendItems(req) {
   CM.send('send-items', Data.items);

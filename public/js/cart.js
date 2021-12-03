@@ -3,7 +3,7 @@ import CM from './ChannelManager.js';
 import { getCookie, setCookie } from './cookies.js';
 const log = console.log;
 
-let Cart;
+let Cart, stripe;
 
 // Number of days after cart cookie will expire
 const expDays = 5;
@@ -22,7 +22,8 @@ CM.open('add-cart-indicator');
 CM.setFormat('activate-cart', 'STRING');
 CM.listen('activate-cart', setCurrentCart);
 
-CM.setFormat('send-user', 'STRING');
+// Initialize stripe
+initStripe();
 
 function setCurrentCart(username) {
   Cart = getCart(username);
@@ -73,7 +74,7 @@ function addStoreEventListeners() {
 
 function addToCart(ev) {
   const itemId = ev.target.getAttribute('data-id');
-  const user = getUser();
+  const user = CM.request('get-user', 'send-user');
 
   // 1. If user is not signed in - redirect to login page
   if (!user) {
@@ -116,12 +117,12 @@ function addToCart(ev) {
 
   // 5. Update cart cookie and make current cart active
   setCookie(`cart-${user}`, Cart, 1000*60*60*24*expDays);
-  CM.send('draw-cart-items', Cart);
+  CM.send('draw-cart-items', Cart);'get-user', 'send-user'
 }
 
 function removeFromCart(ev) {
   const itemId = ev.target.parentNode.getAttribute('data-id');
-  const user = getUser();
+  const user = CM.request();
 
   for (let i=0; i<(Cart.length); i++) {
     if (Cart[i].id == itemId) {
@@ -131,12 +132,15 @@ function removeFromCart(ev) {
   }
 
   setCookie(`cart-${user}`, Cart, 1000*60*60*24*expDays);
-  CM.send('draw-cart-items', Cart);
+  CM.send('draw-cart-items', Cart);'get-user', 'send-user'
 }
 
 function checkout() {
+  const user = CM.request('get-user', 'send-user');
+  const items = CM.request('get-items', 'send-items');
+
   // 1. Verify that user is signed in
-  if (!User) {
+  if (!user) {
     location.href = '/#sign-in';
     return;
   }
@@ -158,10 +162,10 @@ function checkout() {
   Cart.forEach((item) => {
     let match = false;
 
-    for (let i=0; i<(Data.items.length); i++) {
-      if (Data.items[i].id == item.id) {
-        item.name = Data.items[i].name;
-        item.price = Data.items[i].price;
+    for (let i=0; i<(items.length); i++) {
+      if (items[i].id == item.id) {
+        item.name = items[i].name;
+        item.price = items[i].price;
 
         match = true;
         break;
@@ -211,8 +215,6 @@ function checkout() {
       if (result.error) {
         alert(result.error.message);
       }
-
-      clearCart();
     })
     .catch((error) => {
       log('Error proceeding to payment: ', error.message);
@@ -220,18 +222,29 @@ function checkout() {
 }
 
 function clearCart() {
-  if (User) {
-    setCookie(`cart-${User}`, [], 1000*60*60*24*expDays);
+  const user = CM.request('get-user', 'send-user');
+
+  if (user) {
+    Cart = [];
+
+    setCookie(`cart-${user}`, [], 1000*60*60*24*expDays);
+    CM.send('draw-cart-items', Cart);
   }
 }
 
-function getUser() {
-  let user;
+function initStripe() {
+  // 1. Get stripe public key from the server
+  fetch('/stripe-pkey')
+    .then((response) => response.text())
+    .then((key) => {
+      if (!key) {
+        throw new Error('Invalid value for Stripe public key.');
+        return;
+      }
 
-  CM.listenOnce('send-user', (username) => {
-    user = username;
-  })
-  CM.send('get-user', true);
-
-  return user;
+      // 2. Activate Stripe using public key
+      stripe = Stripe(key);
+    }).catch((error) => {
+      log('Error fetching Stripe public key.', error);
+    })
 }

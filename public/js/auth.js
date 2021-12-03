@@ -29,7 +29,7 @@ function signUp(ev) {
   const username = formData.get('username').trim();
   const email = formData.get('email').trim();
   const password = formData.get('password').trim();
-  const passwordRep = formData.get('password-rep');
+  const passwordRep = formData.get('password-rep').trim();
 
   // 1. Validate passwords match
   if (password !== passwordRep) {
@@ -194,7 +194,6 @@ function signInByToken() {
       // 5. Give visual indication of successful authentication
       CM.send('draw-user-elements', username);
     }).catch((error) => {
-      log(error.stack)
       log('Token is not valid or expired. Refused to authenticate automatically.');
     })
 }
@@ -258,7 +257,11 @@ function addSignUpEventListeners() {
   inputs.forEach((input) => {
     input.addEventListener('input', () => {
       input.setCustomValidity('');
-    })
+    });
+
+    input.addEventListener('blur', () => {
+      input.setCustomValidity('');
+    });
   })
 }
 
@@ -272,6 +275,10 @@ function addSignInEventListeners() {
     input.addEventListener('input', () => {
       input.setCustomValidity('');
     })
+
+    input.addEventListener('blur', () => {
+      input.setCustomValidity('');
+    });
   })
 }
 

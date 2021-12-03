@@ -65,7 +65,7 @@ function patternMismatchMessage(input, message) {
 }
 
 function drawCartItems(cartEntries) {
-  const itemsData = getItems();
+  const itemsData = CM.request('get-items', 'send-items');
   let items = [];
 
   cartEntries.forEach((entry) => {
@@ -115,17 +115,6 @@ function toggleCart() {
   cartToggle.classList.toggle('onscreen');
   cartView.classList.toggle('onscreen');
   cartToggle.classList.remove('new');
-}
-
-function getItems() {
-  let items;
-
-  CM.listenOnce('send-items', (data) => {
-    items = data;
-  })
-  CM.send('get-items', true);
-
-  return items;
 }
 
 function addCloseDescriptionListener() {

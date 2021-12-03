@@ -160,8 +160,8 @@ const ChannelManager = (function() {
 
   return {
     open(name) {
-      if (!checkType(name, 'string', 'openChannel')) {return;}
-      if (isEmptyString(name, 'openChannel')) {return;}
+      if (!checkType(name, 'string', 'open')) {return;}
+      if (isEmptyString(name, 'open')) {return;}
 
       if (!channels[name]) {
         channels[name] = {
@@ -174,8 +174,8 @@ const ChannelManager = (function() {
       }
     },
     close(name) {
-      if (!checkType(name, 'string', 'closeChannel')) {return;}
-      if (isEmptyString(name, 'closeChannel')) {return;}
+      if (!checkType(name, 'string', 'close')) {return;}
+      if (isEmptyString(name, 'close')) {return;}
       if (!ChannelManager.exists(name)) {
         throw new Error (`Channel with name '${name}' does not exist.`);
         return;
@@ -186,11 +186,11 @@ const ChannelManager = (function() {
     send(name, data, headers={}) {
       // headers - data headers object
       if (arguments.length < 2) {
-        throw new Error('.sendData() function expects at least 2 arguments: channel name and data.');
+        throw new Error('.send() function expects at least 2 arguments: channel name and data.');
         return;
       }
-      if (!checkType(name, 'string', 'sendData')) {return;}
-      if (isEmptyString(name, 'sendData')) {return;}
+      if (!checkType(name, 'string', 'send')) {return;}
+      if (isEmptyString(name, 'send')) {return;}
       if (!ChannelManager.exists(name)) {
         throw new Error (`Channel with name '${name}' does not exist.`);
         return;
@@ -198,12 +198,12 @@ const ChannelManager = (function() {
 
       // Validate data according to the format
       if (!validateData(data, channels[name].format)) {
-        throw new Error(`Data passed to .sendData() function does not match data format for '${name}' channel. Run .getFormat('${name}') to check the data format.`);
+        throw new Error(`Data passed to .send() function does not match data format for '${name}' channel. Run .getFormat('${name}') to check the data format.`);
         return;
       }
 
       if (typeof headers !== 'object' || Array.isArray(headers) || headers == null) {
-        throw new Error('Data headers argument passed to .sendData() function must be an object.');
+        throw new Error('Data headers argument passed to .send() function must be an object.');
         return;
       }
 
@@ -343,6 +343,33 @@ const ChannelManager = (function() {
       if (isEmptyString(name, 'exists')) {return;}
 
       return name in channels;
+    },
+    request(reqChannel, resChannel) {
+      if (arguments.length !== 2) {
+        throw new Error('.request() function expects 2 arguments: request channel name and response channel name.');
+        return;
+      }
+      if (!checkType(reqChannel, 'string', 'request')) {return;}
+      if (!checkType(resChannel, 'string', 'request')) {return;}
+      if (isEmptyString(reqChannel, 'request')) {return;}
+      if (isEmptyString(resChannel, 'request')) {return;}
+      if (!ChannelManager.exists(reqChannel)) {
+        throw new Error (`Channel with name '${reqChannel}' does not exist.`);
+        return;
+      }
+      if (!ChannelManager.exists(resChannel)) {
+        throw new Error (`Channel with name '${resChannel}' does not exist.`);
+        return;
+      }
+
+      let result;
+
+      this.listen(resChannel, (data) => {
+        result = data;
+      })
+      this.send(reqChannel, true);
+
+      return result;
     }
   }
 })();
