@@ -37,6 +37,8 @@ import { stringToPrimitive, searchObjectByString } from './stringConverter.js';
 const log = console.log;
 
 function fillTemplate(template, data) {
+  data = JSON.parse(JSON.stringify(data));
+
   // Check if template is a node element
   if (!('nodeType' in template) || template.nodeType !== Node.ELEMENT_NODE) {
     throw new Error('First argument passed to "fillTemplate" function must be a node element.');
@@ -49,7 +51,6 @@ function fillTemplate(template, data) {
   }
 
   template = template.cloneNode(true);
-
   //*********************************/
   //*********************************/
 
@@ -75,6 +76,7 @@ function fillTemplate(template, data) {
 
     const iterName = attr.substring(ofI+4).trim();
     const iterable = data[iterName];
+
     if (!iterable) {
       throw new Error(`Iterable "${iterName}" is not defined.`);
       return;
@@ -97,6 +99,7 @@ function fillTemplate(template, data) {
       return;
     }
 
+    /// --- ///
     iterable.forEach((element) => {
       const template = document.createElement('template');
       const content = repeat.childNodes;
@@ -109,8 +112,21 @@ function fillTemplate(template, data) {
 
       output.append(fillTemplate(template, data));
     })
-
-    data[varname] = undefined;
+    /// --- ///
+    // This section caused an issue with nested repeat tags.
+    // Before, data object was not cloned, but instead assigned new temporary property (data[varname] = element, 5 lines up)
+    // After the loop, property was cleared:
+    // delete data[varname]; -- This line was located here
+    // Issue was that property was cleared out before engine could fill and append child templates
+    // So, JavaScript threw an error: 'Iterable /iterName/ is not defined.'
+    // Loop seems to be working fine, it loops correct number of times and passes correct data to recursive function, which
+    //   result was the appended to the output.
+    // The propblem is that for some reason, output cannot keep up with the loop, presumably due to asyncronous nature of .append() method
+    // So, after the loop has been finnished, output template was still missing some parts and could not finish them because
+    //  temporary iterable property has been already cleared out.
+    // The solution was to do a copy of data object on the first line, and then keep iterable property on data object
+    // Better workaround needs to be found if possible
+    /// --- ///
 
     // 4. Replace <repeat> tag with actual content
     repeat.replaceWith(output);
@@ -198,9 +214,23 @@ function fillTemplate(template, data) {
 
   //*********************************/
   //*********************************/
+
   let string = template.innerHTML;
-  let start = string.indexOf('{{');
-  let end = string.indexOf('}}');
+
+  // Remove comments
+  let start = string.indexOf('<!--');
+  let end = string.indexOf('-->');
+
+  while (start >= 0 && end >= 0) {
+    string = string.substring(0, start) + string.substring(end+3);
+
+    start = string.indexOf('<!--');
+    end = string.indexOf('-->');
+  }
+
+  // Replace variables
+  start = string.indexOf('{{');
+  end = string.indexOf('}}');
 
   while (start >= 0 && end >= 0) {
     const varname = string.substring(start+2, end).trim();

@@ -118,7 +118,19 @@
 </template>
 
 <template id="orders-template">
-  {{ message }}
+  <div class="orders">
+    <repeat for="order of orders">
+      <div class="order">
+        <repeat for="item of order">
+          {{ item.product }}</br>
+          {{ item.price }}</br>
+          {{ item.quantity }}</br>
+          {{ item.total }}</br>
+        </repeat>
+        -------------------------
+      </div>
+    </repeat>
+  </div>
 </template>
 
 </html>

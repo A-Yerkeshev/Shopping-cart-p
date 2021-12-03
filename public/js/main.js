@@ -147,7 +147,9 @@ function fillOrdersTemplate() {
         }
       }).then((orders) => {
 
-        let data = {message: JSON.stringify(orders, null, 2)};
+        let data = {
+          orders
+        }
 
         resolve(fillTemplate(ordersTpl, data));
       }).catch((error) => {

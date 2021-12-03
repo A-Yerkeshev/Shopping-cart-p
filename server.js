@@ -395,9 +395,9 @@ app.get('/orders', async (request, response) => {
       let sessions = await stripe.checkout.sessions.list();
       sessions = sessions.data;
 
-      // 3. Leave only sessions for given user
+      // 3. Leave only paid sessions for given user
       sessions = sessions.filter((session) => {
-        return session.customer_email === email;
+        return session.customer_email === email && session.payment_status === 'paid';
       })
 
       // 4. Retrieve list items for every session
