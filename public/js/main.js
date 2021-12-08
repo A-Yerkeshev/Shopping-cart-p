@@ -147,6 +147,14 @@ function fillOrdersTemplate() {
         }
       }).then((orders) => {
 
+        // Convert price to display price
+        orders.forEach((order) => {
+          order.forEach((item) => {
+            item.displayPrice = '$' + (item.price/100).toFixed(2);
+            item.total = '$' + (item.total/100).toFixed(2);
+          })
+        })
+
         let data = {
           orders
         }

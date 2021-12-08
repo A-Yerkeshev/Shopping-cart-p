@@ -379,3 +379,16 @@ nav a {
 .payment-message .btn-orange {
   margin: auto;
 }
+
+/*** ORDERS ***********************************************************/
+#orders {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--yellow-pale);
+  padding: 1rem;
+}
+
+.order {
+  background-color: var(--white);
+}

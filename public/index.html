@@ -32,7 +32,7 @@
     </main>
   </div>
 
-  <section id="cart" class="">
+  <section id="cart">
   </section>
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/auth.js"></script>
@@ -119,13 +119,13 @@
 </template>
 
 <template id="orders-template">
-  <div class="orders">
+  <div id="orders">
     <repeat for="order of orders">
       <div class="order">
         <repeat for="item of order">
           <div class="order-item">
           {{ item.product }}</br>
-          {{ item.price }}</br>
+          {{ item.displayPrice }}</br>
           {{ item.quantity }}</br>
           {{ item.total }}</br>
           </div>
