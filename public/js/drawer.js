@@ -11,6 +11,7 @@ const cartView = document.getElementById('cart');
 const cartToggle = document.getElementById('cart-toggle');
 const paymentSuccessTpl = document.getElementById('payment-success-template');
 const paymentCancelTpl = document.getElementById('payment-cancel-template');
+const ordersLink = document.querySelector('.orders-link');
 
 // Listen to requests from Auth module
 CM.setFormat('report-validity', {
@@ -20,7 +21,7 @@ CM.setFormat('report-validity', {
 CM.listen('report-validity', reportValidity);
 
 CM.setFormat('draw-user-elements', 'STRING');
-CM.listen('draw-user-elements', fillUserBox, displayCart);
+CM.listen('draw-user-elements', fillUserBox, displayCart, displayOrdersLink);
 
 // Listen to requests from Cart module
 CM.setFormat('draw-cart-items', 'ARRAY');
@@ -124,5 +125,9 @@ function addCloseDescriptionListener() {
   close.addEventListener('click', () => {
     descr.remove();
   })
+}
+
+function displayOrdersLink() {
+  ordersLink.classList.remove('hidden');
 }
 

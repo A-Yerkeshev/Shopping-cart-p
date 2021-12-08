@@ -17,6 +17,7 @@
   </header>
   <nav>
     <a href="/#">Browse</a>
+    <a href="/#orders" class="orders-link hidden">My orders</a>
     <a href="/#sign-in">Sign In</a>
     <a href="/#sign-up">Sign Up</a>
     <span id="userbox"></span>
@@ -122,12 +123,13 @@
     <repeat for="order of orders">
       <div class="order">
         <repeat for="item of order">
+          <div class="order-item">
           {{ item.product }}</br>
           {{ item.price }}</br>
           {{ item.quantity }}</br>
           {{ item.total }}</br>
+          </div>
         </repeat>
-        -------------------------
       </div>
     </repeat>
   </div>
