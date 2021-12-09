@@ -126,11 +126,6 @@ nav a {
 }
 
 /*** STORE ********************************************************/
-#store-container {
-  display: flex;
-  flex-direction: column;
-}
-
 .item {
   width: 70%;
   margin: 1rem auto;

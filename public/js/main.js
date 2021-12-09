@@ -27,7 +27,6 @@ Router.onload('sign-up', addSignUpEventListeners);
 Router.when('sign-in', signInTpl.content);
 Router.onload('sign-in', addSignInEventListeners);
 Router.when('payment-success', paymentSuccessTpl.content);
-Router.onload('payment-success', clearCart);
 Router.when('payment-cancel', paymentCancelTpl.content);
 Router.onload('payment-cancel', () => {
   setTimeout(() => Router.redirect('/'), 3000)
@@ -41,7 +40,6 @@ CM.open('add-sign-in-el');
 
 // Establish connection with Cart module
 CM.open('add-store-el');
-CM.open('clear-cart');
 
 // Establish connection with Drawer module
 CM.open('cart-layout-updated');
@@ -115,10 +113,6 @@ function fetchItems() {
     .catch((error) => console.error('Error fetching data from /products: ' + error));
 }
 
-function clearCart() {
-  CM.send('clear-cart', true);
-}
-
 function sendItems(req) {
   CM.send('send-items', Data.items);
 }
@@ -165,7 +159,7 @@ function fillOrdersTemplate() {
               minute: 'numeric'
             }
 
-            order.date = new Intl.DateTimeFormat('en-UK', options).format(date);
+            order.date = new Intl.DateTimeFormat('en-UK', options).format(order.date);
           } else {
             order.date = '';
           }

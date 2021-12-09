@@ -14,6 +14,7 @@ CM.open('draw-user-elements');
 
 // Establish connection with Cart module
 CM.open('activate-cart');
+CM.open('clear-cart');
 
 CM.open('get-user');
 CM.open('send-user');
@@ -188,10 +189,15 @@ function signInByToken() {
       // 3. Set current user
       User = username;
 
-      // 4. Set user cart as active
+      // 4. If app was loaded after payment and current page is #payment-success, clear cart for user
+      if (location.hash == '#payment-success') {
+        CM.send('clear-cart', username);
+      }
+
+      // 5. Set user cart as active
       CM.send('activate-cart', username);
 
-      // 5. Give visual indication of successful authentication
+      // 6. Give visual indication of successful authentication
       CM.send('draw-user-elements', username);
     }).catch((error) => {
       log('Token is not valid or expired. Refused to authenticate automatically.');

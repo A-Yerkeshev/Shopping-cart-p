@@ -221,9 +221,7 @@ function checkout() {
     })
 }
 
-function clearCart() {
-  const user = CM.request('get-user', 'send-user');
-
+function clearCart(user) {
   if (user) {
     Cart = [];
 
