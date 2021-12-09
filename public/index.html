@@ -122,14 +122,17 @@
   <div id="orders">
     <repeat for="order of orders">
       <div class="order">
-        <repeat for="item of order">
-          <div class="order-item">
-          {{ item.product }}</br>
-          {{ item.displayPrice }}</br>
-          {{ item.quantity }}</br>
-          {{ item.total }}</br>
-          </div>
-        </repeat>
+        <span class="order-date">{{ order.date }}</span>
+        <t class="order-table">
+          <repeat for="item of order.items">
+            <trow>
+              <tcell>{{ item.product }}</tcell>
+              <tcell>{{ item.displayPrice }}</tcell>
+              <tcell>quant: {{ item.quantity }}</tcell>
+            </trow>
+          </repeat>
+        </t>
+        <span class="order-total">Total: <b>{{ order.total }}</b></span>
       </div>
     </repeat>
   </div>

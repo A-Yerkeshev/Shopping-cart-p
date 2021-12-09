@@ -391,4 +391,20 @@ nav a {
 
 .order {
   background-color: var(--white);
+  padding: 0.4rem;
 }
+
+.order-date {
+  font-size: 1rem;
+}
+
+.order-table {
+  margin: 0.6rem 0;
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.order-total {
+  float: right;
+}
+

@@ -34,6 +34,15 @@ import { stringToPrimitive, searchObjectByString } from './stringConverter.js';
 // 3. Comparison to non-primitive value -- <if cond="{{ func }} === myFunc"> -- is invalid
 // 4. Mathematical operations -- <if cond="{{ num + 3 }} > 7"> -- is invalid
 
+// Because <thead> <tbody> <tr> and <td> tags cannot be parsed from string,
+// nor any irrelevant tag can be inserted into <table>, use following substitutes:
+// <t> for <table>
+// <tablehead> for <thead>
+// <tablebody> for <tbody>
+// <trow> for <tr>
+// <tcell> for <td>
+// Afterwards, call updateTableTags() function, see explanation below.
+
 const log = console.log;
 
 function fillTemplate(template, data) {
@@ -75,7 +84,7 @@ function fillTemplate(template, data) {
     }
 
     const iterName = attr.substring(ofI+4).trim();
-    const iterable = data[iterName];
+    const iterable = searchObjectByString(iterName, data);
 
     if (!iterable) {
       throw new Error(`Iterable "${iterName}" is not defined.`);
@@ -99,10 +108,11 @@ function fillTemplate(template, data) {
       return;
     }
 
+    const content = repeat.childNodes; // -- Does not include table's inner tags like <tr>, <td>, <tbody> and <thead>.
+
     /// --- ///
     iterable.forEach((element) => {
       const template = document.createElement('template');
-      const content = repeat.childNodes;
 
       for (let node of content) {
         template.content.append(node.cloneNode(true));
@@ -119,12 +129,12 @@ function fillTemplate(template, data) {
     // delete data[varname]; -- This line was located here
     // Issue was that property was cleared out before engine could fill and append child templates
     // So, JavaScript threw an error: 'Iterable /iterName/ is not defined.'
-    // Loop seems to be working fine, it loops correct number of times and passes correct data to recursive function, which
-    //   result was the appended to the output.
+    // Loop seems to be working fine, it loops correct number of times and passes correct data to recursive function, whose
+    //   result was appended to the output.
     // The propblem is that for some reason, output cannot keep up with the loop, presumably due to asyncronous nature of .append() method
     // So, after the loop has been finnished, output template was still missing some parts and could not finish them because
     //  temporary iterable property has been already cleared out.
-    // The solution was to do a copy of data object on the first line, and then keep iterable property on data object
+    // The solution was to do a copy of data object on the first line, and then keep iterable property on data object.
     // Better workaround needs to be found if possible
     /// --- ///
 
@@ -245,9 +255,117 @@ function fillTemplate(template, data) {
   return document.createRange().createContextualFragment(string);
 }
 
+// Because <thead> <tbody> <tr> and <td> tags cannot be parsed from string, their substitude tags were used.
+// It is not possible to call this function inside fillTemplate(), because if fillTemplate() was called recursively
+// result of fillTemplate() will be converted back to string and parsed again, so all inner table tags will be lost.
+// Therefore, this function has to be called manually, after fillTemplate() was completed.
+// User can pass the result of fillTemplate() into this function and then append result to the page,
+// or alternatively, append result of fillTemplate() to the page, and then call this function without arguments.
+//
+// return value is updated DocumentFragment or document if function was called without arguments
+function updateTableTags(target=document) {
+  const tables = target.querySelectorAll('t');
+  const theads = target.querySelectorAll('tablehead');
+  const tbodies = target.querySelectorAll('tablebody');
+  const trows = target.querySelectorAll('trow');
+  const tcells = target.querySelectorAll('tcell');
+
+  tables.forEach((table) => {
+    const t = document.createElement('table');
+    replaceTag(table, t);
+  })
+
+  theads.forEach((tablehead) => {
+    const thead = document.createElement('thead');
+    replaceTag(tablehead, thead);
+  })
+
+  tbodies.forEach((tablebody) => {
+    const tbody = document.createElement('tbody');
+    replaceTag(tablebody, tbody);
+  })
+
+  trows.forEach((trow) => {
+    const tr = document.createElement('tr');
+    replaceTag(trow, tr);
+  })
+
+  tcells.forEach((tcell) => {
+    const td = document.createElement('td');
+    replaceTag(tcell, td);
+  })
+
+  return target;
+}
+
+// type --- 'string', 'number', 'boolean', 'object', 'function', 'node', 'elementNode'
+function checkType(input, type, functionName) {
+  switch (type) {
+    case 'string':
+      if (typeof input === 'string') {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be of 'string' type.`);
+        return false;
+      }
+      break;
+    case 'number':
+      if (typeof input === 'number') {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be of 'number' type.`);
+        return false;
+      }
+      break;
+    case 'boolean':
+      if (typeof input === 'boolean') {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be of 'boolean' type.`);
+        return false;
+      }
+      break;
+    case 'object':
+      if (typeof input === 'object') {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be of 'object' type.`);
+        return false;
+      }
+      break;
+    case 'function':
+      if (typeof input === 'function') {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be of 'function' type.`);
+        return false;
+      }
+      break;
+    case 'node':
+      if (input instanceof Node) {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be a HTML node.`);
+        return false;
+      }
+    case 'elementNode':
+      if (input.nodeType && input.nodeType === 1) {
+        return true;
+      } else {
+        throw new Error(`Argument passed to ${functionName}() function must be an element node.`);
+        return false;
+      }
+    default:
+      throw new Error("Second argument passed to checkType function must be 'string', 'number', 'boolean', 'object', 'function', 'node'or 'elementNode'");
+  }
+}
+
 // This function takes conditions string, breaks them down and does evaluation
 // Return value is boolean.
 function evaluateStringConditions(string, data) {
+  checkType(string, 'string', 'evaluateStringConditions');
+  checkType(data, 'object', 'evaluateStringConditions');
+
   // Check for invalid characters
   const invalid = ["!", "(", ")", "[", "]", ".", ",", "+", "-", "*", "/"];
 
@@ -306,6 +424,9 @@ function evaluateStringConditions(string, data) {
 }
 
 function evaluateSingleStringCondition(string, data) {
+  checkType(string, 'string', 'evaluateSingleStringCondition');
+  checkType(data, 'object', 'evaluateSingleStringCondition');
+
   const operators = ['===', '!==', '==', '!=', '>=', '<=', '>', '<'];
 
   // 1. Check if condition contains comparison operators
@@ -376,4 +497,25 @@ function evaluateSingleStringCondition(string, data) {
   }
 }
 
-export default fillTemplate;
+function replaceTag(oldTag, newTag) {
+  checkType(oldTag, 'elementNode');
+  checkType(newTag, 'elementNode');
+
+  // 1. Move all content from old tag to new tag
+  const children = oldTag.childNodes;
+
+  while (children.length > 0) {
+    newTag.appendChild(children[0]);
+  }
+
+  // 2. Move attributes
+  const attrs = oldTag.attributes;
+
+  for (let i = attrs.length - 1; i >= 0; i--) {
+     newTag.setAttribute(attrs[i].name, attrs[i].value);
+  }
+
+  oldTag.replaceWith(newTag);
+}
+
+export { fillTemplate, updateTableTags };

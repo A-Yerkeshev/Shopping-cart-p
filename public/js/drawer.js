@@ -1,6 +1,6 @@
 "use strict";
 import CM from './ChannelManager.js';
-import fillTemplate from './fillTemplate.js';
+import { fillTemplate } from './fillTemplate.js';
 const log = console.log;
 
 const store = document.getElementById('store-template');

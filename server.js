@@ -156,6 +156,9 @@ app.post('/create-checkout-session', async (request, response) => {
         payment_method_types: ['card'],
         line_items: line,
         mode: 'payment',
+        metadata: {
+          date: Date.now()
+        },
         success_url: successUrl,
         cancel_url: cancelUrl
       }
@@ -405,8 +408,14 @@ app.get('/orders', async (request, response) => {
         let items = await stripe.checkout.sessions.listLineItems(session.id);
         items = items.data;
 
+        const order = {
+          items: null,
+          total: 0,
+          date: null
+        }
+
         // 5. Retrieve product name for every item in the order
-        const order = await Promise.all(items.map(async (item) => {
+        order.items = await Promise.all(items.map(async (item) => {
           const product = await stripe.products.retrieve(item.price.product);
           const productName = product.name;
 
@@ -416,6 +425,12 @@ app.get('/orders', async (request, response) => {
             product: productName,
             total: item.amount_total,
             quantity: item.quantity
+          }
+
+          order.total += item.amount_total;
+
+          if (session.metadata.date) {
+            order.date = session.metadata.date;
           }
 
           return itemData;

@@ -1,6 +1,6 @@
 "use strict";
 import Router from './router.js';
-import fillTemplate from './fillTemplate.js';
+import { fillTemplate, updateTableTags } from './fillTemplate.js';
 import { getCookie, setCookie } from './cookies.js';
 import CM from './ChannelManager.js';
 
@@ -149,17 +149,35 @@ function fillOrdersTemplate() {
 
         // Convert price to display price
         orders.forEach((order) => {
-          order.forEach((item) => {
+          order.items.forEach((item) => {
             item.displayPrice = '$' + (item.price/100).toFixed(2);
-            item.total = '$' + (item.total/100).toFixed(2);
           })
+
+          order.total = '$' + (order.total/100).toFixed(2);
+
+          if (order.date) {
+            const options = {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+            }
+
+            order.date = new Intl.DateTimeFormat('en-UK', options).format(date);
+          } else {
+            order.date = '';
+          }
         })
 
         let data = {
           orders
         }
 
-        resolve(fillTemplate(ordersTpl, data));
+        let fragment = fillTemplate(ordersTpl, data);
+        fragment = updateTableTags(fragment);
+
+        resolve(fragment);
       }).catch((error) => {
         reject(error);
       })
