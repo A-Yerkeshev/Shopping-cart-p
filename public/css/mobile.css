@@ -24,7 +24,7 @@
 }
 
 html {
-  font-size: 32px;
+  font-size: 12px;
   font-family: Verdana, Geneva, sans-serif;
   color: var(--black);
   overflow-x: hidden;
@@ -56,7 +56,7 @@ input {
   display: none;
 }
 
-/***************************************/
+/***HEADER************************************/
 
 header {
   padding: 0.6rem 0;
@@ -115,7 +115,6 @@ nav a {
 
 .descr {
   background-color: var(--yellow-pale);
-  font-size: 0.4rem;
   margin: 0.4rem;
   padding: 0.6rem 1.8rem 0.6rem 0.6rem;
   text-align: justify;
@@ -127,6 +126,10 @@ nav a {
 }
 
 /*** STORE ********************************************************/
+#store-container {
+  display: flex;
+  flex-direction: column;
+}
 
 .item {
   width: 70%;
@@ -265,6 +268,7 @@ nav a {
   font-size: 2.2rem;
   background-color: var(--yellow);
   color: var(--black);
+  border: 2px solid var(--yellow-shade);
   border-right: none;
   border-radius: 0.4rem 0 0 0.4rem;
   padding: 0 0.4rem 0 0.8rem;
@@ -331,6 +335,11 @@ nav a {
   height: 1.4rem;
   background-color: transparent;
   border-radius: 50%;
+  border: 1px solid var(--black);
+}
+
+.cart-item button i {
+  vertical-align: text-bottom;
 }
 
 .total {
@@ -341,7 +350,7 @@ nav a {
   float: right;
   font-size: 1.4rem;
   font-weight: bold;
-  border: 5px solid white;
+  border: 2px solid white;
   text-shadow: 0px 2px 4px var(--black);
   box-shadow: 0px 1px 5px var(--orange);
 }
@@ -406,5 +415,14 @@ nav a {
 
 .order-total {
   float: right;
+}
+
+.no-orders {
+  text-align: center;
+  padding: 1rem;
+}
+
+.no-orders h2 {
+  margin-bottom: 1.2rem;
 }
 

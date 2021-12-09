@@ -159,7 +159,8 @@ async function updateView() {
       content = await content();
 
       if (!validateElement(content)) {
-        reject(new Error(`Function defined for route '${hash}' did not return HTMLElement/DocumentFragment.`));
+        throw new Error(`Function defined for route '${hash}' did not return HTMLElement/DocumentFragment.`);
+        return;
       }
     } else if (validateElement(content)) {
       content = content.cloneNode(true);
@@ -168,8 +169,15 @@ async function updateView() {
       return;
     }
 
-    view.innerHTML = '';
-    view.appendChild(content);
+    // Check that user did not leave the page before content was loaded
+    const currentHash = location.hash.substring(1);
+
+    if (currentHash != hash) {
+      return;
+    } else {
+      view.innerHTML = '';
+      view.appendChild(content);
+    }
   } else {
     // Url did not match any route - redirect to default
     location.hash = '#'+defaultRoute;

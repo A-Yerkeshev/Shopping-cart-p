@@ -37,8 +37,8 @@ import { stringToPrimitive, searchObjectByString } from './stringConverter.js';
 // Because <thead> <tbody> <tr> and <td> tags cannot be parsed from string,
 // nor any irrelevant tag can be inserted into <table>, use following substitutes:
 // <t> for <table>
-// <tablehead> for <thead>
-// <tablebody> for <tbody>
+// <th> for <thead>
+// <tb> for <tbody>
 // <trow> for <tr>
 // <tcell> for <td>
 // Afterwards, call updateTableTags() function, see explanation below.
@@ -265,8 +265,8 @@ function fillTemplate(template, data) {
 // return value is updated DocumentFragment or document if function was called without arguments
 function updateTableTags(target=document) {
   const tables = target.querySelectorAll('t');
-  const theads = target.querySelectorAll('tablehead');
-  const tbodies = target.querySelectorAll('tablebody');
+  const theads = target.querySelectorAll('th');
+  const tbodies = target.querySelectorAll('tb');
   const trows = target.querySelectorAll('trow');
   const tcells = target.querySelectorAll('tcell');
 

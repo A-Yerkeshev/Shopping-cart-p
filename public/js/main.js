@@ -12,6 +12,7 @@ const signInTpl = document.getElementById('sign-in-template');
 const paymentSuccessTpl = document.getElementById('payment-success-template');
 const paymentCancelTpl = document.getElementById('payment-cancel-template');
 const ordersTpl = document.getElementById('orders-template');
+const noOrdersTpl = document.getElementById('no-orders-template');
 
 const Data = {
   items: null
@@ -170,14 +171,18 @@ function fillOrdersTemplate() {
           }
         })
 
-        let data = {
-          orders
+        if (orders.length > 0) {
+          let data = {
+            orders
+          }
+
+          let fragment = fillTemplate(ordersTpl, data);
+          fragment = updateTableTags(fragment);
+
+          resolve(fragment);
+        } else {
+          resolve(noOrdersTpl.content.cloneNode(true));
         }
-
-        let fragment = fillTemplate(ordersTpl, data);
-        fragment = updateTableTags(fragment);
-
-        resolve(fragment);
       }).catch((error) => {
         reject(error);
       })

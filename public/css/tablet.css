@@ -1,0 +1,26 @@
+@media only screen and (min-width: 600px) {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    background-color: red;
+  }
+
+  /***HEADER************************************/
+
+  header::after {
+    background-image: repeating-linear-gradient(0deg, var(--black), var(--black) 3px,  transparent 3px, transparent 8px);
+    clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
+  }
+
+  .descr {
+    font-size: 0.8rem;
+  }
+
+  /*** STORE ********************************************************/
+  #store-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

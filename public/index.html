@@ -6,9 +6,12 @@
   content="default-src 'self' http://localhost:35729 ws://localhost:35729;
     script-src 'self' http://localhost:35729 ws://localhost:35729 https://js.stripe.com/v3/;
     frame-src 'self' http://localhost:35729 ws://localhost:35729 https://js.stripe.com/v3/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopping Cart</title>
   <link rel="stylesheet" type="text/css" href="fontawesome/css/all.css">
-  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/mobile.css">
+  <link rel="stylesheet" type="text/css" href="css/tablet.css">
+  <link rel="stylesheet" type="text/css" href="css/desktop.css">
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
 <body>
@@ -41,9 +44,11 @@
 </body>
 
 <template id="store-template">
-  <repeat for="item of items">
-    <insert template="item-template"/>
-  </repeat>
+  <div id="store-container">
+    <repeat for="item of items">
+      <insert template="item-template"/>
+    </repeat>
+  </div>
 </template>
 
 <template id="sign-up-template">
@@ -135,6 +140,13 @@
         <span class="order-total">Total: <b>{{ order.total }}</b></span>
       </div>
     </repeat>
+  </div>
+</template>
+
+<template id="no-orders-template">
+  <div class="no-orders">
+    <h2>You don't have any orders yet.</h2>
+    <a href='/#' class="btn-orange">Start browsing</a>
   </div>
 </template>
 
