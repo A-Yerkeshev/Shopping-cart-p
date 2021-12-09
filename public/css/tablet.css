@@ -1,3 +1,15 @@
+:root {
+  --yellow: #fff000;
+  --yellow-pale: #ffff99;
+  --yellow-shade: #999900;
+  --orange: #ff7000;
+  --orange-dark: #ff5000;
+  --green: #00dd00;
+  --black: #403530;
+  --white: #f9f7f7;
+  --orbitron: orbitron, 'Courier New', monospace;
+}
+
 @media only screen and (min-width: 600px) {
   html {
     font-size: 14px;
@@ -18,5 +30,48 @@
   #store-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-gap: 3rem;
+
+    margin: 2rem;
   }
+
+  .item {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--white);
+    border: 1rem solid var(--yellow-pale);
+    padding: 0;
+  }
+
+  /*** SIGNING PAGES ************************************************/
+  .form h2 {
+    width: 45%;
+  }
+
+  .form form {
+    width: 40%;
+  }
+
+  /*** CART ***********************************************************/
+  .cart-item {
+    width: 70%;
+  }
+
+  /*** PAYMENTS ***********************************************************/
+  .payment-message {
+    width: 70%;
+    margin: auto;
+  }
+
+  /*** ORDERS ***********************************************************/
+  #orders {
+    width: 80%;
+    margin-left: 1rem;
+  }
+
+
+
 }

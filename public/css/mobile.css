@@ -40,6 +40,10 @@ input {
   font-size: 1.4rem;
 }
 
+main {
+  margin: 1rem;
+}
+
 .btn-orange {
   background-color: var(--orange);
   color: white;
@@ -391,6 +395,7 @@ nav a {
   gap: 1rem;
   background-color: var(--yellow-pale);
   padding: 1rem;
+  box-shadow: 0 6px 8px var(--yellow-shade);
 }
 
 .order {
