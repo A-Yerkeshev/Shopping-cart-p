@@ -1,1 +1,151 @@
-@media only screen and (min-width: 992px) {}
+:root {
+  --yellow: #fff000;
+  --yellow-pale: #ffff99;
+  --yellow-shade: #999900;
+  --orange: #ff7000;
+  --orange-dark: #ff5000;
+  --green: #00dd00;
+  --black: #403530;
+  --white: #f9f7f7;
+  --orbitron: orbitron, 'Courier New', monospace;
+}
+
+@media only screen and (min-width: 992px) {
+  .content {
+    display: flex;
+    width: 100vw;
+  }
+
+  #view {
+    flex-grow: 1;
+    flex-basis: 70%;
+  }
+
+  #cart {
+    flex-grow: 1;
+    flex-basis: 20%;
+  }
+
+  /***HEADER************************************/
+  header::after {
+    width: 25%;
+  }
+
+  nav {
+    padding: 0.6rem;
+  }
+
+  .descr {
+    padding: 1rem 1.8rem 1rem 1rem;
+  }
+
+  /*** STORE ********************************************************/
+  #store-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  /*** SIGNING PAGES ************************************************/
+  .form {
+    box-shadow: 0 6px 8px var(--yellow-shade);
+    padding: 2rem;
+    width: 40%;
+    margin: 2rem auto 4rem;
+    position: relative;
+  }
+
+  .form::before,
+  .form::after {
+    content: '';
+    background-color: var(--yellow);
+    position: absolute;
+    top: -10%;
+    bottom: -13%;
+    width: 50%;
+    transform: skewX(-10deg);
+    z-index: -1;
+  }
+
+  .form::before {
+    left: -100%;
+  }
+
+  .form::after {
+    right: -100%;
+  }
+
+  .form h2 {
+    width: 80%;
+  }
+
+  .form form {
+    width: 75%;
+  }
+
+  .form input[type="submit"] {
+    width: 45%;
+  }
+
+  /*** CART ***********************************************************/
+  #cart-toggle,
+  #cart-toggle.visible {
+    display: none;
+  }
+
+  #cart {
+    position: static;
+    transform: translateX(0);
+    height: auto;
+    box-shadow: 0 6px 8px var(--yellow-shade);
+    padding-left: 1.4rem;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: repeat(2, 2fr) 1fr;
+    width: 90%;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+
+  .cart-item h3 {
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .cart-item img {
+    width: 50%;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .cart-tem span {
+    font-size: 1.4rem;
+    grid-column-start: 1;
+    grid-column-end: 2;
+  }
+
+  .cart-item input {
+    width: 60%;
+    justify-self: end;
+    grid-column-start: 2;
+    grid-column-end: 3;
+  }
+
+  .cart-item button {
+    width: 1.4rem;
+    justify-self: end;
+    grid-column-start: 3;
+    grid-column-end: 4;
+  }
+
+    /*** PAYMENTS ***********************************************************/
+    .payment-message {
+      width: 60%;
+    }
+
+  /*** ORDERS ***********************************************************/
+  #orders {
+    width: 70%;
+  }
+}

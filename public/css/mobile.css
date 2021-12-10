@@ -92,7 +92,6 @@ header h1 {
 }
 
 header span {
-  font-size: 0.8rem;
   font-weight: bold;
 }
 
@@ -315,6 +314,8 @@ nav a {
 .cart-item img {
   flex-basis: 10%;
   width: 5rem;
+  padding: 0.4rem;
+  background-color: var(--white);
 }
 
 .cart-item span {

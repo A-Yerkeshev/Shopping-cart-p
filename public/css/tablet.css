@@ -22,10 +22,6 @@
     clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
   }
 
-  .descr {
-    font-size: 0.8rem;
-  }
-
   /*** STORE ********************************************************/
   #store-container {
     display: grid;
@@ -70,8 +66,22 @@
   #orders {
     width: 80%;
     margin-left: 1rem;
+    padding: 2rem;
   }
 
+  .order {
+    border: 1px solid var(--yellow-shade);
+    position: relative;
+    margin-bottom: 2rem;
+  }
 
-
+  .order::after {
+    content: '';
+    border: 1rem solid var(--white);
+    position: absolute;
+    top: calc(-1rem - 1px);
+    left: calc(-1rem - 1px);
+    right: calc(-1rem - 1px);
+    bottom: calc(-1rem - 1px);
+  }
 }
