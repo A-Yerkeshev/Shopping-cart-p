@@ -60,6 +60,10 @@ main {
   display: none;
 }
 
+.content {
+  margin-bottom: 1rem;
+}
+
 /***HEADER************************************/
 
 header {
@@ -226,6 +230,11 @@ nav a {
   border: none;
   color: var(--black);
   box-shadow: 0 1px 4px var(--yellow-shade);
+}
+
+.form input[type="submit"]:hover {
+  color: var(--orange);
+  box-shadow: 0 1px 4px var(--orange);
 }
 
 /*** CART ***********************************************************/

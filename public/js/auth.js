@@ -252,7 +252,7 @@ function addSignUpEventListeners() {
   })
 
   emailInput.addEventListener('invalid', () => {
-    patternMismatchMessage(userInput, 'Email format is invalid.');
+    patternMismatchMessage(emailInput, 'Email format is invalid.');
   })
 
   passInput.addEventListener('invalid', () => {
