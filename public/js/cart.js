@@ -122,7 +122,7 @@ function addToCart(ev) {
 
 function removeFromCart(ev) {
   const itemId = ev.target.parentNode.getAttribute('data-id');
-  const user = CM.request();
+  const user = CM.request('get-user', 'send-user');
 
   for (let i=0; i<(Cart.length); i++) {
     if (Cart[i].id == itemId) {
