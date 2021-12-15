@@ -12,6 +12,10 @@ const cartToggle = document.getElementById('cart-toggle');
 const paymentSuccessTpl = document.getElementById('payment-success-template');
 const paymentCancelTpl = document.getElementById('payment-cancel-template');
 const ordersLink = document.querySelector('.orders-link');
+const descr = document.querySelector('.descr');
+
+// Listen to requests from main module
+CM.listen('close-description', closeDescription);
 
 // Listen to requests from Auth module
 CM.setFormat('report-validity', {
@@ -129,5 +133,9 @@ function addCloseDescriptionListener() {
 
 function displayOrdersLink() {
   ordersLink.classList.remove('hidden');
+}
+
+function closeDescription() {
+  descr.classList.add('hidden');
 }
 

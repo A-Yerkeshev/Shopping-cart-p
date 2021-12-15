@@ -27,8 +27,10 @@ Router.onload('sign-up', addSignUpEventListeners);
 Router.when('sign-in', signInTpl.content);
 Router.onload('sign-in', addSignInEventListeners);
 Router.when('payment-success', paymentSuccessTpl.content);
+Router.onload('payment-success', closeDescription);
 Router.when('payment-cancel', paymentCancelTpl.content);
 Router.onload('payment-cancel', () => {
+  closeDescription();
   setTimeout(() => Router.redirect('/'), 3000)
 });
 Router.when('orders', fillOrdersTemplate);
@@ -43,6 +45,7 @@ CM.open('add-store-el');
 
 // Establish connection with Drawer module
 CM.open('cart-layout-updated');
+CM.open('close-description');
 
 CM.open('get-items');
 CM.open('send-items');
@@ -181,4 +184,8 @@ function fillOrdersTemplate() {
         reject(error);
       })
   })
+}
+
+function closeDescription() {
+  CM.send('close-description', true);
 }
